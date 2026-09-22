@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "dest": "skills/",
+  "skills": [
+    "flowgate",
+    "flowgate-requirements",
+    "flowgate-architecture",
+    "flowgate-solution",
+    "flowgate-testcases",
+    "flowgate-hld",
+    "flowgate-lld",
+    "flowgate-standards",
+    "flowgate-review",
+    "flowgate-docs",
+    "flowgate-release"
+  ]
+}
