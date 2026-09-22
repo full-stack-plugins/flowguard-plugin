@@ -1,10 +1,10 @@
 """产物模板（10 份）与 init 骨架生成。模板带元信息头；内容骨架照 spec §4。"""
 from pathlib import Path
 
-try:  # 包态（unittest: scripts.flowgate_lib）与脚本态（CLI: flowgate_lib）双兼容
-    from ..flowgate_lib import registry, yamlmini
+try:  # 包态（unittest: scripts.flowguard_lib）与脚本态（CLI: flowguard_lib）双兼容
+    from ..flowguard_lib import registry, yamlmini
 except ImportError:  # pragma: no cover
-    from flowgate_lib import registry, yamlmini
+    from flowguard_lib import registry, yamlmini
 
 STAGE_ZH = {
     "requirements": "需求分析", "architecture": "架构设计", "solution": "技术方案",
@@ -129,10 +129,10 @@ def render(artifact_id, ctx):
 
 
 def init_project(root):
-    """建 .flowgate/ 骨架 + config.yaml 默认 + 项目级产物模板；幂等（已初始化则原样返回）。"""
+    """建 .flowguard/ 骨架 + config.yaml 默认 + 项目级产物模板；幂等（已初始化则原样返回）。"""
     import json
     root = Path(root)
-    fg = root / ".flowgate"
+    fg = root / ".flowguard"
     for sub in ("project", "features", "journal"):
         (fg / sub).mkdir(parents=True, exist_ok=True)
     existing = fg / "project.json"
@@ -141,12 +141,12 @@ def init_project(root):
     cfg_path = fg / "config.yaml"
     if not cfg_path.exists():
         cfg_path.write_text(yamlmini.dump(
-            {"schema": "flowgate", "context": "", "rules": {}}), encoding="utf-8")
+            {"schema": "flowguard", "context": "", "rules": {}}), encoding="utf-8")
 
     try:
-        from ..flowgate_lib import detect as _detect
+        from ..flowguard_lib import detect as _detect
     except ImportError:  # pragma: no cover 脚本态
-        from flowgate_lib import detect as _detect
+        from flowguard_lib import detect as _detect
     det = _detect.detect(root)
     project = {
         "version": 1,

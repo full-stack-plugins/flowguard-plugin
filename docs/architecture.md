@@ -1,14 +1,14 @@
-# flowgate-plugin 架构
+# flowguard-plugin 架构
 
 > 权威设计文档：工作区 `docs/superpowers/specs/2026-09-22-devflow-plugin-design.md`（v3.1）。本文是其实现版摘要。
 
 ## 四层结构
 
 ```
-入口与门禁层   /flowgate-* 命令族（commands/*.json）+ hooks 硬门禁（hooks/）
-编排技能层     flowgate 路由 + 10 阶段技能（scripts/templates/workflows.py 生成，parity 测试防漂移）
+入口与门禁层   /flowguard-* 命令族（commands/*.json）+ hooks 硬门禁（hooks/）
+编排技能层     flowguard 路由 + 10 阶段技能（scripts/templates/workflows.py 生成，parity 测试防漂移）
 执行素材层     Tier 1 vendor（skills.lock.json；当前空锁）+ Tier 2 引用（技能名 + npx skills add 安装命令）
-编排核         scripts/flowgate_state.py + scripts/flowgate_lib/*（stdlib；单一判定源）
+编排核         scripts/flowguard_state.py + scripts/flowguard_lib/*（stdlib；单一判定源）
 ```
 
 ## 编排核模块
@@ -35,7 +35,7 @@
 
 ## 并发与恢复
 
-- 状态写入：fcntl 独占锁（`.flowgate/.lock`），锁冲突快速失败。
+- 状态写入：fcntl 独占锁（`.flowguard/.lock`），锁冲突快速失败。
 - journal：全局唯一 `journal/events.jsonl`，每行 {ts, scope, event, detail}；Phase 1 只留痕不重建（恢复工具 = Phase 2 开放问题）。
 
 ## 发布

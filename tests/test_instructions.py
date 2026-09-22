@@ -1,9 +1,9 @@
 import tempfile, unittest
 from pathlib import Path
-from scripts.flowgate_lib import instructions, yamlmini
+from scripts.flowguard_lib import instructions, yamlmini
 
 CONFIG = """\
-schema: flowgate
+schema: flowguard
 context: |
   Tech stack: Python + Vue
 rules:
@@ -14,10 +14,10 @@ rules:
 class InstructionsTest(unittest.TestCase):
     def setUp(self):
         self.root = Path(tempfile.mkdtemp())
-        (self.root / ".flowgate").mkdir()
+        (self.root / ".flowguard").mkdir()
 
     def test_injects_config_context_and_rules(self):
-        (self.root / ".flowgate" / "config.yaml").write_text(CONFIG, encoding="utf-8")
+        (self.root / ".flowguard" / "config.yaml").write_text(CONFIG, encoding="utf-8")
         ins = instructions.build(self.root, "01-requirements", feature="order-refund")
         self.assertIn("Tech stack: Python + Vue", ins["context"])
         self.assertEqual(ins["rules"]["specs"][0], "每条 REQ 必须带验收标准")
@@ -33,7 +33,7 @@ class InstructionsTest(unittest.TestCase):
         self.assertEqual(ins["context"], "")
         self.assertEqual(ins["rules"], {})
         self.assertEqual(ins["scope"], "project")
-        self.assertEqual(yamlmini.load.__module__, "scripts.flowgate_lib.yamlmini")
+        self.assertEqual(yamlmini.load.__module__, "scripts.flowguard_lib.yamlmini")
 
 if __name__ == "__main__":
     unittest.main()

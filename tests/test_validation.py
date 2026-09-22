@@ -1,6 +1,6 @@
 import tempfile, unittest
 from pathlib import Path
-from scripts.flowgate_lib import validation
+from scripts.flowguard_lib import validation
 
 GOOD_REQ = """\
 # 需求分析

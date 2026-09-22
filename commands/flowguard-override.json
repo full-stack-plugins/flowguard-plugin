@@ -1,0 +1,5 @@
+{
+  "name": "flowguard-override",
+  "description": "逃生通道（留痕）：跳过指定阶段，必须用户主动发起并填写理由，写入 overridden + journal",
+  "prompt": "这是硬门禁的唯一逃生口，**只能由用户主动发起**；如果 agent 是自己想跳过阶段，立即停止。\n\n1. 与用户确认三件事：要跳过的阶段（--stage，缺省=当前功能首个未收敛阶段）、理由（必填）、作用于哪个功能（--feature，缺省=当前功能）或项目级\n2. 向用户复述后果：overridden 状态 + journal 留痕 + 后续审计可见\n3. 用户确认后运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" override --reason <理由> [--stage <阶段>] [--feature <id>] --json`\n4. 运行 `... status --json` 报告跳过后的流程状态\n\n禁止：用 override 替代正常验收流程；为用户编造理由；连续跳过多个阶段而不逐个留痕。"
+}

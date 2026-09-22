@@ -1,5 +1,5 @@
 import unittest
-from scripts.flowgate_lib import registry
+from scripts.flowguard_lib import registry
 
 def mk_project(std="in_progress", arch="accepted", features=None):
     return {"version": 1, "modules": {"order": {"src_roots": ["server/order"], "stack": "java"},
@@ -48,8 +48,8 @@ class ArtifactStatusTest(unittest.TestCase):
         )
         import pathlib, tempfile
         root = pathlib.Path(tempfile.mkdtemp())
-        (root / ".flowgate" / "features" / "order-refund" / "artifacts").mkdir(parents=True)
-        (root / ".flowgate" / "features" / "order-refund" / "artifacts" / "01-requirements.md").write_text("x")
+        (root / ".flowguard" / "features" / "order-refund" / "artifacts").mkdir(parents=True)
+        (root / ".flowguard" / "features" / "order-refund" / "artifacts" / "01-requirements.md").write_text("x")
         status, missing = registry.artifact_status("03-solution", proj, feat, root=root)
         self.assertEqual(status, "ready", missing)
 
@@ -58,7 +58,7 @@ class ArtifactStatusTest(unittest.TestCase):
         proj = mk_project()
         feat = mk_feature()
         root = pathlib.Path(tempfile.mkdtemp())
-        d = root / ".flowgate" / "features" / "order-refund" / "artifacts"
+        d = root / ".flowguard" / "features" / "order-refund" / "artifacts"
         d.mkdir(parents=True)
         (d / "01-requirements.md").write_text("x")
         status, _ = registry.artifact_status("01-requirements", proj, feat, root=root)

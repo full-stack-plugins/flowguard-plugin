@@ -1,10 +1,10 @@
 import io, json, unittest
 from contextlib import redirect_stderr, redirect_stdout
-from scripts.flowgate_lib import diag
+from scripts.flowguard_lib import diag
 
 class EnvelopeTest(unittest.TestCase):
     def test_four_keys(self):
-        env = diag.envelope("ERROR", "gate_write_code_tdd", "先验收测试用例", "运行 /flowgate-advance")
+        env = diag.envelope("ERROR", "gate_write_code_tdd", "先验收测试用例", "运行 /flowguard-advance")
         self.assertEqual(set(env), {"severity", "code", "message", "fix"})
         self.assertEqual(env["severity"], "ERROR")
 

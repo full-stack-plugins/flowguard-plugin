@@ -2,7 +2,7 @@ import json, subprocess, sys, tempfile, unittest
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-CLI = REPO / "scripts" / "flowgate_state.py"
+CLI = REPO / "scripts" / "flowguard_state.py"
 
 
 def run(root, *argv):

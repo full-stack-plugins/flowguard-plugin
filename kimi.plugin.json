@@ -1,5 +1,5 @@
 {
-  "name": "flowgate",
+  "name": "flowguard",
   "version": "0.1.0",
   "interface": {
     "displayName": "研发流程门禁",
@@ -11,22 +11,22 @@
   "hooks": [
     {
       "event": "SessionStart",
-      "command": "python3 ./hooks/flowgate_status_summary.py",
+      "command": "python3 ./hooks/flowguard_status_summary.py",
       "timeout": 30
     },
     {
       "event": "PreToolUse",
-      "command": "python3 ./hooks/flowgate_gate.py",
+      "command": "python3 ./hooks/flowguard_gate.py",
       "timeout": 120
     },
     {
       "event": "PostToolUse",
-      "command": "python3 ./hooks/flowgate_artifact_check.py",
+      "command": "python3 ./hooks/flowguard_artifact_check.py",
       "timeout": 60
     },
     {
       "event": "Stop",
-      "command": "python3 ./hooks/flowgate_stage_summary.py",
+      "command": "python3 ./hooks/flowguard_stage_summary.py",
       "timeout": 30
     }
   ],

@@ -1,10 +1,10 @@
-# AGENTS.md — flowgate-plugin 开发纪律
+# AGENTS.md — flowguard-plugin 开发纪律
 
 给 AI（与本仓开发者）的强制纪律。违反任何一条的提交都不应被合并。
 
 ## 全局约束（照 spec 决策表）
 
-- 命名：仓库 `flowgate-plugin`、name `flowgate`、displayName「研发流程门禁」、i18n en "FlowGate: R&D Process Gate"、命令前缀 `/flowgate-*`、产物目录 `.flowgate/`。
+- 命名：仓库 `flowguard-plugin`、name `flowguard`、displayName「研发流程门禁」、i18n en "FlowGuard: R&D Process Gate"、命令前缀 `/flowguard-*`、产物目录 `.flowguard/`。
 - Python 仅标准库；测试用 `python3 -m unittest discover -s tests`（不是 pytest）。
 - SKILL.md ≤ 500 行；frontmatter 必含 `name`（kebab，与目录同名）/ `license: Apache-2.0` / `description`（含触发词与负面边界）/ `compatibility`。
 - 跨技能引用只用「技能名 + `npx skills add <org>/<pkg> --skill <name>`」，禁止 `../` 相对路径指向其它技能。
@@ -29,12 +29,12 @@
 
 ## 三条核心实现纪律
 
-- **编排核单一判定源**：状态/门禁/下一步判定只存在于 flowgate_lib，hooks 与命令只是呈现面（JSON 与文本永不漂移）。
+- **编排核单一判定源**：状态/门禁/下一步判定只存在于 flowguard_lib，hooks 与命令只是呈现面（JSON 与文本永不漂移）。
 - **SKILL.md 是生成物**：改内容改 `scripts/templates/workflows.py` 模板源，再跑 `scripts/generate_skills.py`；parity 测试强制一致。
 - **accepted 只能由用户写入**：`advance` 是唯一入口；agent 永远不能代替用户验收；override 必须用户发起 + 理由留痕。
 
 ## 实现规格参照
 
 - 设计文档（单一权威）：`docs/superpowers/specs/2026-09-22-devflow-plugin-design.md`
-- Phase 1 实施计划：工作区 `docs/superpowers/plans/2026-09-22-flowgate-plugin-phase1.md`
+- Phase 1 实施计划：工作区 `docs/superpowers/plans/2026-09-22-flowguard-plugin-phase1.md`
 - 钩子协议：`hooks/__protocol__.md`（改协议必须同 commit 更新契约与测试）

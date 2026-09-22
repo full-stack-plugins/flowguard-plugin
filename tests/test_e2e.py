@@ -3,7 +3,7 @@ import json, shutil, subprocess, sys, tempfile, unittest
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-CLI = REPO / "scripts" / "flowgate_state.py"
+CLI = REPO / "scripts" / "flowguard_state.py"
 FIXTURE = REPO / "tests" / "fixtures" / "multi_feature"
 
 REQ_A = """# 订单退款 —— 需求分析
@@ -62,7 +62,7 @@ class EndToEndTest(unittest.TestCase):
         self.advance("--stage", "standards")
 
         # A：真实内容写入需求与用例（含测试文件），五阶段逐个验收
-        adir = self.root / ".flowgate" / "features" / "order-refund" / "artifacts"
+        adir = self.root / ".flowguard" / "features" / "order-refund" / "artifacts"
         (adir / "01-requirements.md").write_text(REQ_A, encoding="utf-8")
         (adir / "04-testcases.md").write_text(TC_A, encoding="utf-8")
         tests_dir = self.root / "tests"
@@ -103,12 +103,12 @@ class EndToEndTest(unittest.TestCase):
         # 交付收口
         self.assertEqual(self.cli("next", "--stage", "release").returncode, 0)
         self.advance("--stage", "release")
-        self.assertTrue((self.root / ".flowgate" / "project" / "10-release.md").exists())
+        self.assertTrue((self.root / ".flowguard" / "project" / "10-release.md").exists())
         r = self.cli("gate", "--action", "build_release", "--json")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
 
         # journal 全程留痕
-        jl = (self.root / ".flowgate" / "journal" / "events.jsonl").read_text(encoding="utf-8")
+        jl = (self.root / ".flowguard" / "journal" / "events.jsonl").read_text(encoding="utf-8")
         for ev in ("init", "feature_new", "accepted_by_user", "feature_drop"):
             self.assertIn(f'"event": "{ev}"', jl)
 

@@ -44,7 +44,7 @@ jobs:
             echo "skills up to date"
             exit 0
           fi
-          git config user.name "flowgate-sync-bot"
+          git config user.name "flowguard-sync-bot"
           git config user.email "noreply@full-stack-plugins.dev"
           git checkout -b chore/skills-sync
           git add skills skills.lock.json

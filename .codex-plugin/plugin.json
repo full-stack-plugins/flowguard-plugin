@@ -1,5 +1,5 @@
 {
-  "name": "flowgate",
+  "name": "flowguard",
   "version": "0.1.0+codex.20260922",
   "interface": {
     "displayName": "研发流程门禁",
@@ -12,8 +12,8 @@
     ],
     "brandColor": "#0F766E",
     "logo": "./assets/official-logo.png",
-    "privacyPolicyURL": "https://github.com/full-stack-plugins/flowgate-plugin/blob/main/PRIVACY.md",
-    "termsOfServiceURL": "https://github.com/full-stack-plugins/flowgate-plugin/blob/main/TERMS.md",
+    "privacyPolicyURL": "https://github.com/full-stack-plugins/flowguard-plugin/blob/main/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/full-stack-plugins/flowguard-plugin/blob/main/TERMS.md",
     "logoDark": "./assets/official-logo.png"
   },
   "description": "SDLC orchestration plugin with hard stage gates: a ten-stage pipeline (requirements, architecture, solution, test cases, HLD, LLD, coding standards, review, docs, release) across multiple features and modules."

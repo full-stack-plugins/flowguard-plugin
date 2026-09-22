@@ -1,18 +1,18 @@
 {
   "hooks": {
     "SessionStart": [
-      { "hooks": [ { "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/flowgate_status_summary.py\"", "timeout": 30 } ] }
+      { "hooks": [ { "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/flowguard_status_summary.py\"", "timeout": 30 } ] }
     ],
     "PreToolUse": [
       { "matcher": "Write|Edit|MultiEdit|Bash",
-        "hooks": [ { "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/flowgate_gate.py\"", "timeout": 120 } ] }
+        "hooks": [ { "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/flowguard_gate.py\"", "timeout": 120 } ] }
     ],
     "PostToolUse": [
       { "matcher": "Write|Edit|MultiEdit",
-        "hooks": [ { "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/flowgate_artifact_check.py\"", "timeout": 60 } ] }
+        "hooks": [ { "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/flowguard_artifact_check.py\"", "timeout": 60 } ] }
     ],
     "Stop": [
-      { "hooks": [ { "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/flowgate_stage_summary.py\"", "timeout": 30 } ] }
+      { "hooks": [ { "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/flowguard_stage_summary.py\"", "timeout": 30 } ] }
     ]
   }
 }

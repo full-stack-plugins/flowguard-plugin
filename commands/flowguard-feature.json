@@ -1,0 +1,5 @@
+{
+  "name": "flowguard-feature",
+  "description": "功能生命周期管理：new（创建并声明涉及模块）/ list / done / drop（须填理由）",
+  "prompt": "管理 flowguard 功能流水线。先确认用户想做哪个子命令：\n\n**new <feature-id> --modules <模块...> [--title 标题]**\n1. feature-id 必须是 kebab 格式（小写字母/数字/连字符）\n2. --modules 必须是 project.json.modules 中已注册的模块（可多个，决定写码门禁的归属判定）\n3. 运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" feature new <id> --modules <模块...> --json`\n4. 报告生成的 7 份功能产物与下一步（/flowguard-next）\n\n**list**：运行 `... feature list --json` 并渲染功能清单（状态/涉及模块）。\n\n**done <id>**：先检查是否全部阶段收敛（未收敛会报未验收阶段清单）；如用户坚持放弃收口，引导用 drop 并写理由。\n\n**drop <id> --reason <理由>**：理由必填，留痕 journal。\n\n禁止跳过 CLI 直接手改 .flowguard/ 下的状态文件。"
+}

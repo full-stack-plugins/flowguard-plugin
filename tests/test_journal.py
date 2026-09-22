@@ -1,6 +1,6 @@
 import datetime, tempfile, unittest
 from pathlib import Path
-from scripts.flowgate_lib import journal
+from scripts.flowguard_lib import journal
 
 class JournalTest(unittest.TestCase):
     def setUp(self):

@@ -1,5 +1,5 @@
 import unittest
-from scripts.flowgate_lib import ids
+from scripts.flowguard_lib import ids
 
 class KebabTest(unittest.TestCase):
     def test_samples(self):

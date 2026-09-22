@@ -1,5 +1,0 @@
-{
-  "name": "flowgate-status",
-  "description": "流程看板：项目级三阶段 + 各功能进度 + 需求追溯覆盖率 + 阻塞原因",
-  "prompt": "运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowgate_state.py\" status --json` 并把结果渲染成看板：\n\n1. 项目级三阶段（架构设计/编码规范/部署交付）各自状态\n2. 每个功能一行：状态、涉及模块、七阶段进度条（如 req✅ sol✅ tc✅ hld✅ lld⬜ rev⬜ doc⬜）、REQ 覆盖率 x/y\n3. current_feature 高亮标注\n4. 对处于 pending_acceptance 或有阻塞的功能，给出解锁该状态的命令\n\n如用户追问某个功能的细节，运行 `... status --feature <id> --json` 展开其阶段证据。"
-}

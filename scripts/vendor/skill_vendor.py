@@ -101,7 +101,7 @@ def load_lock(path: Path) -> dict:
         raise RuntimeError(f"unsupported lockfile version: {lock.get('version')}")
     if not isinstance(lock.get("sources"), list):
         raise RuntimeError("lockfile requires a sources list")
-    # flowgate 定制：允许空 sources（全部技能走 plugin-local-skills.json，Tier 1 回填前为空）
+    # flowguard 定制：允许空 sources（全部技能走 plugin-local-skills.json，Tier 1 回填前为空）
     # 依据：本仓 AGENTS.md —— 上游无不可变 tag 时不得 vendor；空锁 = 合法的「未 vendor 任何上游」状态。
     return lock
 

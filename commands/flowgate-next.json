@@ -1,5 +1,0 @@
-{
-  "name": "flowgate-next",
-  "description": "进入当前功能的下一阶段：返回机读指令（context/rules/模板/依赖/Tier2 执行技能）并开始产出",
-  "prompt": "推进 flowgate 流水线到下一个待做阶段：\n\n1. 运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowgate_state.py\" next --json`（可用 --feature <id> 指定功能；项目级阶段用 `next --stage <architecture|standards|release>`）\n2. 读取返回的 instructions JSON：\n   - `context` 与 `rules`：项目级约束，必须遵守，**禁止抄进产物正文**\n   - `template`：加载对应产物模板文件作为骨架\n   - `requires`：依赖产物若未就绪，先说明缺什么\n   - `tier2`：列出的执行技能若未安装且用户需要深入能力，给出 install 命令（npx skills add ...）\n3. 按模板与用户输入产出该阶段产物（写回 instructions 指向的产物文件）\n4. 产出完成后运行 `... gate` 自检，并提示用户可执行 /flowgate-advance 进入验收\n\n硬性约束：验收必须由用户发起（/flowgate-advance），agent 不得自行验收。"
-}

@@ -8,7 +8,7 @@ class ManifestContractTest(unittest.TestCase):
 
     def test_zcode_manifest_core_fields(self):
         m = self._load(".zcode-plugin/plugin.json")
-        self.assertEqual(m["name"], "flowgate")
+        self.assertEqual(m["name"], "flowguard")
         self.assertEqual(m["displayName"], "研发流程门禁")
         # sync-plugin-configs 以 catalog 为单源规范 i18n（en 与 displayName 同值）
         self.assertEqual(m["displayName_i18n"]["en"], "研发流程门禁")
@@ -36,7 +36,7 @@ class ManifestContractTest(unittest.TestCase):
 
     def test_agents_marketplace_source(self):
         p = self._load(".agents/plugins/marketplace.json")["plugins"][0]
-        self.assertEqual(p["name"], "flowgate")
+        self.assertEqual(p["name"], "flowguard")
         self.assertRegex(p["source"]["ref"], r"^v\d+\.\d+\.\d+$")
 
 if __name__ == "__main__":

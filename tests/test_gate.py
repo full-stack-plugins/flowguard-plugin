@@ -1,6 +1,6 @@
 import json, tempfile, unittest
 from pathlib import Path
-from scripts.flowgate_lib import gate
+from scripts.flowguard_lib import gate
 
 def write(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -32,12 +32,12 @@ class GateTest(unittest.TestCase):
         self.root = Path(tempfile.mkdtemp())
 
     def _init(self, project=None, feature=None):
-        write(self.root / ".flowgate" / "project.json", project or mk_project())
-        write(self.root / ".flowgate" / "features" / "order-refund" / "state.json", feature or mk_feature())
+        write(self.root / ".flowguard" / "project.json", project or mk_project())
+        write(self.root / ".flowguard" / "features" / "order-refund" / "state.json", feature or mk_feature())
 
     def test_classify_path(self):
         self._init()
-        self.assertEqual(gate.classify_path(self.root, ".flowgate/artifacts/01-requirements.md"), "artifact")
+        self.assertEqual(gate.classify_path(self.root, ".flowguard/artifacts/01-requirements.md"), "artifact")
         self.assertEqual(gate.classify_path(self.root, "server/order/A.java"), "module:order")
         self.assertEqual(gate.classify_path(self.root, "README.md"), "other")
         self.assertEqual(gate.classify_path(self.root, "web/src/App.vue"), "module:web")
@@ -48,7 +48,7 @@ class GateTest(unittest.TestCase):
             ("write_code", "server/order/A.java", True, None),
             ("write_code", "web/src/App.vue", False, "gate_write_code_feature_mismatch"),
             ("write_code", "README.md", True, None),
-            ("write_code", ".flowgate/artifacts/01-requirements.md", True, None),
+            ("write_code", ".flowguard/artifacts/01-requirements.md", True, None),
         ]
         for action, path, allowed, code in rows:
             res = gate.check_action(self.root, action, path=path)
@@ -66,8 +66,8 @@ class GateTest(unittest.TestCase):
     def test_no_current_feature(self):
         proj = mk_project()
         proj.pop("current_feature")
-        write(self.root / ".flowgate" / "project.json", proj)
-        write(self.root / ".flowgate" / "features" / "order-refund" / "state.json", mk_feature())
+        write(self.root / ".flowguard" / "project.json", proj)
+        write(self.root / ".flowguard" / "features" / "order-refund" / "state.json", mk_feature())
         res = gate.check_action(self.root, "write_code", path="server/order/A.java")
         self.assertFalse(res["allowed"])
         self.assertEqual(res["envelope"]["code"], "gate_write_code_no_module")
@@ -77,14 +77,14 @@ class GateTest(unittest.TestCase):
         self.assertFalse(gate.check_action(self.root, "write_docs")["allowed"])
         self.assertFalse(gate.check_action(self.root, "build_release")["allowed"])
         f = mk_feature({"review": "accepted", "docs": "accepted"})
-        write(self.root / ".flowgate" / "features" / "order-refund" / "state.json", f)
+        write(self.root / ".flowguard" / "features" / "order-refund" / "state.json", f)
         self.assertTrue(gate.check_action(self.root, "write_docs")["allowed"])
         proj = mk_project(std="accepted",
                           features={"order-refund": {"status": "done", "path": "features/order-refund"}})
-        write(self.root / ".flowgate" / "project.json", proj)
+        write(self.root / ".flowguard" / "project.json", proj)
         self.assertTrue(gate.check_action(self.root, "build_release")["allowed"])
 
-    def test_uninitialized_flowgate_allows(self):
+    def test_uninitialized_flowguard_allows(self):
         res = gate.check_action(self.root, "write_code", path="server/order/A.java")
         self.assertTrue(res["allowed"])
         self.assertIsNone(res["envelope"])

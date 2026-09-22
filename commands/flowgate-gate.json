@@ -1,5 +1,0 @@
-{
-  "name": "flowgate-gate",
-  "description": "门禁自检：报告四类动作（写码/审查/文档/发布）的放行状态与阻塞原因",
-  "prompt": "运行 flowgate 门禁自检：\n\n1. 运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowgate_state.py\" gate --json` 查看四类动作整体放行状态\n2. 对被阻塞的动作，逐条运行带 `--action <动作> --path <路径>` 的定向检查拿到诊断信封（severity/code/message/fix）\n3. 把每个阻塞渲染成「动作 | code | 原因 | 解锁命令」表格\n4. 运行 `... validate --json` 附带产物完整性问题（格式/追溯矩阵/测试文件存在性/Tier2 技能缺失）\n\n只读操作：本命令绝不修改状态。被阻塞时给出最小解锁路径（通常 = 完成并验收某阶段），提醒用户 override 是留痕逃生口而非常规手段。"
-}

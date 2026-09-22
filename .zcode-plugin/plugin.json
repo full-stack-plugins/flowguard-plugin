@@ -1,5 +1,5 @@
 {
-  "name": "flowgate",
+  "name": "flowguard",
   "displayName": "研发流程门禁",
   "displayName_i18n": {
     "en": "研发流程门禁",
@@ -15,8 +15,8 @@
     "name": "full-stack-plugins",
     "url": "https://github.com/full-stack-plugins"
   },
-  "homepage": "https://github.com/full-stack-plugins/flowgate-plugin",
-  "repository": "https://github.com/full-stack-plugins/flowgate-plugin",
+  "homepage": "https://github.com/full-stack-plugins/flowguard-plugin",
+  "repository": "https://github.com/full-stack-plugins/flowguard-plugin",
   "license": "Apache-2.0",
   "keywords": [
     "sdlc",

@@ -1,14 +1,14 @@
 {
-  "name": "full-stack-plugins-flowgate",
+  "name": "full-stack-plugins-flowguard",
   "interface": {
     "displayName": "研发流程门禁"
   },
   "plugins": [
     {
-      "name": "flowgate",
+      "name": "flowguard",
       "source": {
         "source": "url",
-        "url": "https://github.com/full-stack-plugins/flowgate-plugin.git",
+        "url": "https://github.com/full-stack-plugins/flowguard-plugin.git",
         "ref": "v0.1.0"
       },
       "policy": {
@@ -17,12 +17,12 @@
       },
       "category": "Developer Tools",
       "version": "0.1.0",
-      "icon": "https://cdn.jsdelivr.net/gh/full-stack-plugins/flowgate-plugin@v0.1.0/assets/official-logo.png",
+      "icon": "https://cdn.jsdelivr.net/gh/full-stack-plugins/flowguard-plugin@v0.1.0/assets/official-logo.png",
       "description": "SDLC orchestration plugin with hard stage gates: a ten-stage pipeline (requirements, architecture, solution, test cases, HLD, LLD, coding standards, review, docs, release) across multiple features and modules.",
       "interface": {
         "displayName": "研发流程门禁",
         "shortDescription": "研发流程门禁：十阶段 SDLC 硬门禁编排",
-        "logo": "https://cdn.jsdelivr.net/gh/full-stack-plugins/flowgate-plugin@v0.1.0/assets/official-logo.png"
+        "logo": "https://cdn.jsdelivr.net/gh/full-stack-plugins/flowguard-plugin@v0.1.0/assets/official-logo.png"
       }
     }
   ]

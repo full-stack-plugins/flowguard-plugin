@@ -1,4 +1,4 @@
-# flowgate 钩子协议（机读契约 · 单源）
+# flowguard 钩子协议（机读契约 · 单源）
 
 > 本文件是四个钩子的 stdout / stderr / exit-code 唯一契约。
 > **改动任何钩子的输入输出行为，必须同 commit 更新本文件与 `tests/test_hooks.py`。**
@@ -19,12 +19,12 @@
 
 | 钩子 | 事件 | 行为 | stdout | stderr | exit |
 |---|---|---|---|---|---|
-| flowgate_status_summary.py | SessionStart | 注入流程状态摘要 | `[flowgate] ...` 多行文本 | 无 | 0（未初始化静默） |
-| flowgate_gate.py | PreToolUse | 硬门禁判定 | 无 | 拒绝时 `ERROR: <msg>` + `Fix: <fix>` + `[flowgate] code=<code>`；异常 `WARNING: ...` | 放行 0 / **拒绝 2** / 异常 0 |
-| flowgate_artifact_check.py | PostToolUse | 产物校验 + 回改降级 + journal | 无 | `[flowgate] ...` 提示（不阻断） | 恒 0 |
-| flowgate_stage_summary.py | Stop | 阶段小结与下一步 | `[flowgate] ...` 文本 | 无 | 0（未初始化静默） |
+| flowguard_status_summary.py | SessionStart | 注入流程状态摘要 | `[flowguard] ...` 多行文本 | 无 | 0（未初始化静默） |
+| flowguard_gate.py | PreToolUse | 硬门禁判定 | 无 | 拒绝时 `ERROR: <msg>` + `Fix: <fix>` + `[flowguard] code=<code>`；异常 `WARNING: ...` | 放行 0 / **拒绝 2** / 异常 0 |
+| flowguard_artifact_check.py | PostToolUse | 产物校验 + 回改降级 + journal | 无 | `[flowguard] ...` 提示（不阻断） | 恒 0 |
+| flowguard_stage_summary.py | Stop | 阶段小结与下一步 | `[flowguard] ...` 文本 | 无 | 0（未初始化静默） |
 
-## 门禁动作映射（flowgate_gate.py）
+## 门禁动作映射（flowguard_gate.py）
 
 | tool | 判定 |
 |---|---|
@@ -42,6 +42,6 @@
 
 ## 防误伤原则
 
-1. 未初始化项目（无 `.flowgate/project.json`）：全部放行。
+1. 未初始化项目（无 `.flowguard/project.json`）：全部放行。
 2. 钩子自身任何异常：放行 + stderr WARNING（误伤代价 > 漏放）。
 3. 拒绝时 stderr 必含诊断信封三行（ERROR/Fix/code），供 agent 与用户自助解锁。

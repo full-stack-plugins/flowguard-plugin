@@ -1,6 +1,6 @@
 import json, tempfile, unittest
 from pathlib import Path
-from scripts.flowgate_lib import detect
+from scripts.flowguard_lib import detect
 from scripts.templates import artifacts
 
 def touch(path):
@@ -68,11 +68,11 @@ class InitProjectTest(unittest.TestCase):
         root = Path(tempfile.mkdtemp())
         touch(root / "pom.xml")
         proj = detect.init_project(root)
-        self.assertTrue((root / ".flowgate" / "project.json").exists())
-        self.assertTrue((root / ".flowgate" / "config.yaml").exists())
-        self.assertTrue((root / ".flowgate" / "project" / "02-architecture.md").exists())
-        self.assertTrue((root / ".flowgate" / "project" / "07-standards.md").exists())
-        self.assertTrue((root / ".flowgate" / "project" / "10-release.md").exists())
+        self.assertTrue((root / ".flowguard" / "project.json").exists())
+        self.assertTrue((root / ".flowguard" / "config.yaml").exists())
+        self.assertTrue((root / ".flowguard" / "project" / "02-architecture.md").exists())
+        self.assertTrue((root / ".flowguard" / "project" / "07-standards.md").exists())
+        self.assertTrue((root / ".flowguard" / "project" / "10-release.md").exists())
         self.assertEqual(proj["modules"]["app"]["stack"], "java-spring")
         self.assertIsNone(proj["current_feature"])
         # 幂等
