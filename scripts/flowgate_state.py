@@ -109,7 +109,7 @@ def cmd_feature(args):
                 p.write_text(artifacts.render(aid, {
                     "feature": args.id, "title": args.title or args.id,
                     "modules": ",".join(args.modules),
-                    "req_prefix": f"{args.id}/REQ"}), encoding="utf-8")
+                    "req_prefix": "<feature-id>/REQ"}), encoding="utf-8")
         feature = {"version": 1, "feature": args.id, "title": args.title or args.id,
                    "modules": args.modules, "status": "active", "stages": stages}
         state.save_feature(root, feature)

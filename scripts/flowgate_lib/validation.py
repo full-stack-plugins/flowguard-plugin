@@ -129,20 +129,28 @@ def validate_requirements(text, feature):
 
 
 def validate_testcases(text, req_ids, root):
-    """追溯矩阵：每条 REQ 被覆盖；每条用例的测试文件存在。"""
+    """追溯矩阵：每条 REQ 被覆盖；每条用例的测试文件存在。
+
+    含 `<占位符>` 的块视为模板未填写示例，不参与机械检查。
+    """
     lines = text.splitlines()
     masked = _mask_code_fences(lines)
     issues = []
     covered, cur_req, cur_file, in_case = set(), None, None, False
+    placeholder = False
 
     def flush_case():
-        nonlocal cur_req, cur_file
-        if cur_req:
-            covered.add(cur_req)
-        if cur_req and not cur_file:
-            issues.append(_issue("ERROR", "04-testcases.md",
-                                 f"用例（REQ {cur_req}）缺 `- 测试文件:` 标注",
-                                 HINTS["testfile"]))
+        nonlocal cur_req, cur_file, placeholder
+        if in_case and placeholder:
+            pass  # 模板示例块
+        else:
+            if cur_req:
+                covered.add(cur_req)
+            if cur_req and not cur_file:
+                issues.append(_issue("ERROR", "04-testcases.md",
+                                     f"用例（REQ {cur_req}）缺 `- 测试文件:` 标注",
+                                     HINTS["testfile"]))
+        cur_req, cur_file, placeholder = None, None, False
 
     for ln, hide in zip(lines, masked):
         if hide:
@@ -150,15 +158,18 @@ def validate_testcases(text, req_ids, root):
         if re.match(r"^### 用例", ln):
             flush_case()
             in_case, cur_req, cur_file = True, None, None
+            placeholder = "<" in ln
             continue
         if in_case:
+            if "<" in ln:
+                placeholder = True
             m_req = re.match(r"^-\s*REQ:\s*(\S+)", ln.strip())
             m_file = re.match(r"^-\s*测试文件:\s*(\S+)", ln.strip())
             if m_req:
                 cur_req = m_req.group(1)
             elif m_file:
                 cur_file = m_file.group(1)
-                if not (Path(root) / cur_file).exists():
+                if "<" not in cur_file and not (Path(root) / cur_file).exists():
                     issues.append(_issue("ERROR", "04-testcases.md",
                                          f"测试文件不存在: {cur_file}",
                                          HINTS["testfile"]))
@@ -173,21 +184,23 @@ def validate_testcases(text, req_ids, root):
 
 
 def validate_review(text):
-    """每条发现项须有 `- 结论: fix|wontfix|deferred`。"""
+    """每条发现项须有 `- 结论: fix|wontfix|deferred`。含 `<占位符>` 的块视为模板示例，跳过。"""
     lines = text.splitlines()
     masked = _mask_code_fences(lines)
     issues = []
     in_finding = False
     concluded = False
+    placeholder = False
 
     def flush():
-        nonlocal in_finding, concluded
-        if in_finding and not concluded:
+        nonlocal in_finding, concluded, placeholder
+        if in_finding and not concluded and not placeholder:
             issues.append(_issue("ERROR", "08-review.md",
                                  "发现项缺结论",
                                  HINTS["conclusion"]))
         in_finding = False
         concluded = False
+        placeholder = False
 
     for ln, hide in zip(lines, masked):
         if hide:
@@ -195,9 +208,13 @@ def validate_review(text):
         if re.match(r"^#{2,4}\s*发现", ln):
             flush()
             in_finding = True
+            placeholder = "<" in ln
             continue
-        if in_finding and re.match(r"^-\s*结论:\s*(fix|wontfix|deferred)\s*$", ln.strip()):
-            concluded = True
+        if in_finding:
+            if "<" in ln:
+                placeholder = True
+            if re.match(r"^-\s*结论:\s*(fix|wontfix|deferred)\s*$", ln.strip()):
+                concluded = True
     flush()
     return issues
 

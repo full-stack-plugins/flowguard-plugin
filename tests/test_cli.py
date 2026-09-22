@@ -61,11 +61,10 @@ class CliTest(unittest.TestCase):
         r = run(self.root, "override", "--stage", "review", "--reason", "hotfix 需求", "--json")
         self.assertEqual(r.returncode, 0, r.stderr)
 
-        # validate：模板用例引用的测试文件不存在 → ERROR（exit 3），且消息含"测试文件"
+        # validate：全模板态（示例块含占位符）→ 不参与机械检查，validate 通过
         r = run(self.root, "validate", "--json")
-        self.assertEqual(r.returncode, 3)
-        out = json.loads(r.stdout)
-        self.assertTrue(any("测试文件" in i["message"] for i in out["issues"]))
+        self.assertEqual(r.returncode, 0, r.stdout)
+        self.assertTrue(json.loads(r.stdout)["ok"])
 
         # 未初始化目录：gate 放行
         empty = Path(tempfile.mkdtemp())
