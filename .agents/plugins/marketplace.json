@@ -9,20 +9,20 @@
       "source": {
         "source": "url",
         "url": "https://github.com/full-stack-plugins/flowguard-plugin.git",
-        "ref": "v0.1.1"
+        "ref": "v0.1.2"
       },
       "policy": {
         "installation": "AVAILABLE",
         "authentication": "ON_USE"
       },
       "category": "Developer Tools",
-      "version": "0.1.1",
-      "icon": "https://cdn.jsdelivr.net/gh/full-stack-plugins/flowguard-plugin@v0.1.1/assets/official-logo.png",
+      "version": "0.1.2",
+      "icon": "https://cdn.jsdelivr.net/gh/full-stack-plugins/flowguard-plugin@v0.1.2/assets/official-logo.png",
       "description": "SDLC orchestration plugin with hard stage gates: a ten-stage pipeline (requirements, architecture, solution, test cases, HLD, LLD, coding standards, review, docs, release) across multiple features and modules.",
       "interface": {
         "displayName": "研发流程门禁",
         "shortDescription": "研发流程门禁：十阶段 SDLC 硬门禁编排",
-        "logo": "https://cdn.jsdelivr.net/gh/full-stack-plugins/flowguard-plugin@v0.1.1/assets/official-logo.png"
+        "logo": "https://cdn.jsdelivr.net/gh/full-stack-plugins/flowguard-plugin@v0.1.2/assets/official-logo.png"
       }
     }
   ]

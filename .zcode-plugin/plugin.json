@@ -5,7 +5,7 @@
     "en": "研发流程门禁",
     "zh-CN": "研发流程门禁"
   },
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "SDLC orchestration plugin with hard stage gates: a ten-stage pipeline (requirements, architecture, solution, test cases, HLD, LLD, coding standards, review, docs, release) across multiple features and modules.",
   "description_i18n": {
     "en": "SDLC orchestration with hard stage gates across requirements, solution design, test cases, HLD, LLD, coding standards, review, docs and release.",
