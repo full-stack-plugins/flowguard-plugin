@@ -1,5 +1,8 @@
 # FlowGuard · 研发流程门禁
 
+[![skills-check](https://github.com/full-stack-plugins/flowguard-plugin/actions/workflows/skills-check.yml/badge.svg)](https://github.com/full-stack-plugins/flowguard-plugin/actions/workflows/skills-check.yml)
+[![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
 四端同源插件（ZCode / Codex / Kimi / Claude），把完整研发生命周期编排为**带硬门禁的十阶段流水线**：需求分析 → 架构设计 → 技术方案 → 测试用例 → 概要设计 → 详细设计 → 编码规范 → 代码审查 → 文档生成 → 部署交付。
 
 ## 定位
@@ -29,7 +32,27 @@ AI 入口还有：`/flowguard-status`（看板）、`/flowguard-gate`（门禁�
 ## 命令与钩子
 
 命令：`/flowguard-init | -feature | -status | -next | -advance | -gate | -override`。
+
+CLI 子命令（`python3 scripts/flowguard_state.py <cmd>`，退出码 0 成功 / 2 门禁拒绝 / 3 错误）：
+
+| 子命令 | 作用 |
+|---|---|
+| `init` | 建 `.flowgate/` 骨架（幂等） |
+| `status [--feature X]` | 流程看板（单功能详情用 --feature） |
+| `feature new <id> --modules <m...>` / `list` / `done` / `drop --reason R` | 功能生命周期 |
+| `next [--feature X \| --stage S]` | 开始阶段并取回机读指令 |
+| `advance [--feature X] [--stage S]` | 用户验收（accepted 唯一写入点） |
+| `override --reason R [...]` | 留痕逃生 |
+| `gate [--action A --path P]` | 门禁自检 / 定向判定 |
+| `validate [--feature X]` | 产物机械校验 |
+| `instructions <artifact> [--feature X]` | 阶段指令（context/rules/模板/Tier2） |
 钩子：SessionStart（状态摘要）、PreToolUse（硬门禁，exit 2）、PostToolUse（产物校验 + 回改降级）、Stop（下一步提示）。契约见 [hooks/\_\_protocol\_\_.md](hooks/__protocol__.md)。
+
+## 文档
+
+- [docs/architecture.md](docs/architecture.md) — 架构（四层/三级模型/门禁）
+- [docs/FLOWGUARD_ARTIFACT_SPEC.md](docs/FLOWGUARD_ARTIFACT_SPEC.md) — 产物格式契约（十类产物 + 占位符规则）
+- [docs/roadmap.md](docs/roadmap.md) — Phase 2/3 路线图与开放问题
 
 ## 验证
 

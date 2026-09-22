@@ -247,7 +247,3 @@ compatibility: 需要项目内已运行 /flowguard-init 且存在 current_featur
 - 引用 Tier 2 执行技能时给出安装命令
 """
 
-
-def render_artifact_template(artifact_id, body_ctx):
-    from . import artifacts
-    return artifacts.render(artifact_id, body_ctx)

@@ -25,12 +25,16 @@ class Parser(argparse.ArgumentParser):
 
     def error(self, message):
         self.print_usage(sys.stderr)
-        emit_diag(mk_env("ERROR", "usage", message, "查看 --help"))
+        emit_diag(mk_env("ERROR", "usage", message, "查看 --help"),
+                  as_json="--json" in sys.argv)
         sys.exit(3)
 
 
-def _die(env, code=3, as_json=False):
-    emit_diag(env, as_json=as_json)
+_AS_JSON = False  # main() 从 args.json 设置：错误信封与正常输出同面
+
+
+def _die(env, code=3, as_json=None):
+    emit_diag(env, as_json=_AS_JSON if as_json is None else as_json)
     sys.exit(code)
 
 
@@ -65,10 +69,16 @@ def cmd_init(args):
 def cmd_status(args):
     root = Path.cwd()
     project = state.load_project(root)
+    scope = list((project.get("features") or {}).keys())
+    if getattr(args, "feature", None):
+        if args.feature not in scope:
+            _die(mk_env("ERROR", "unknown_feature", f"功能不存在: {args.feature}",
+                        "用 /flowguard-feature list 查看功能清单"))
+        scope = [args.feature]
     out = {"project": project["project"], "current_feature": project.get("current_feature"),
            "project_stages": {s: project["stages"][s]["status"] for s in PROJECT_STAGES},
            "features": {}}
-    for fid in (project.get("features") or {}):
+    for fid in scope:
         try:
             f = state.load_feature(root, fid)
         except state.StateError:
@@ -297,7 +307,11 @@ def cmd_validate(args):
 
 
 def cmd_instructions(args):
-    ins = instructions.build(Path.cwd(), args.artifact, feature=args.feature)
+    try:
+        ins = instructions.build(Path.cwd(), args.artifact, feature=args.feature)
+    except KeyError:
+        _die(mk_env("ERROR", "unknown_artifact", f"未知 artifact: {args.artifact}",
+                    "artifact 取值为 01-requirements ~ 10-release"))
     print(json.dumps(ins, ensure_ascii=False, indent=2))
 
 
@@ -357,6 +371,8 @@ def main(argv=None):
         sub.choices[name].add_argument("--json", action="store_true")
 
     args = p.parse_args(argv)
+    global _AS_JSON
+    _AS_JSON = bool(getattr(args, "json", False))
     try:
         args.fn(args)
     except state.StateError as e:

@@ -1,5 +1,8 @@
 # FlowGuard · 研发流程门禁
 
+[![skills-check](https://github.com/full-stack-plugins/flowguard-plugin/actions/workflows/skills-check.yml/badge.svg)](https://github.com/full-stack-plugins/flowguard-plugin/actions/workflows/skills-check.yml)
+[![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
 Four-host plugin (ZCode / Codex / Kimi / Claude) that orchestrates the full SDLC as a **ten-stage pipeline with hard stage gates**: Requirements → Architecture → Solution → Test Cases → HLD → LLD → Coding Standards → Code Review → Docs → Release.
 
 ## Positioning
@@ -30,7 +33,27 @@ AI entry points: `/flowguard-status`, `/flowguard-gate`, `/flowguard-override` (
 ## Commands & Hooks
 
 Commands: `/flowguard-init | -feature | -status | -next | -advance | -gate | -override`.
+
+CLI subcommands (`python3 scripts/flowguard_state.py <cmd>`, exit codes: 0 ok / 2 gate-blocked / 3 error):
+
+| subcommand | 作用 |
+|---|---|
+| `init` | 建 `.flowgate/` 骨架（幂等） |
+| `status [--feature X]` | 流程看板（单功能详情用 --feature） |
+| `feature new <id> --modules <m...>` / `list` / `done` / `drop --reason R` | 功能生命周期 |
+| `next [--feature X \| --stage S]` | 开始阶段并取回机读指令 |
+| `advance [--feature X] [--stage S]` | 用户验收（accepted 唯一写入点） |
+| `override --reason R [...]` | 留痕逃生 |
+| `gate [--action A --path P]` | 门禁自检 / 定向判定 |
+| `validate [--feature X]` | 产物机械校验 |
+| `instructions <artifact> [--feature X]` | 阶段指令（context/rules/模板/Tier2） |
 Hooks: SessionStart (status digest), PreToolUse (hard gate, exit 2), PostToolUse (artifact validation + rework degradation), Stop (next-step digest). Contract: [hooks/\_\_protocol\_\_.md](hooks/__protocol__.md).
+
+## Docs
+
+- [docs/architecture.md](docs/architecture.md) — 架构（四层/三级模型/门禁）
+- [docs/FLOWGUARD_ARTIFACT_SPEC.md](docs/FLOWGUARD_ARTIFACT_SPEC.md) — 产物格式契约（十类产物 + 占位符规则）
+- [docs/roadmap.md](docs/roadmap.md) — Phase 2/3 路线图与开放问题
 
 ## Verification
 
