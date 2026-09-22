@@ -1,6 +1,6 @@
 {
   "name": "flowguard",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "interface": {
     "displayName": "研发流程门禁",
     "shortDescription": "研发流程门禁：十阶段 SDLC 硬门禁编排",
