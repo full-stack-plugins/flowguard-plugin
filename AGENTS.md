@@ -27,6 +27,12 @@
 - 改上游 → 打不可变 tag → 更新 `skills.lock.json` → `python3 scripts/vendor/skill_vendor.py update`。
 - `plugin-local-skills.json` 是本仓自研技能白名单；`skills/` 下未登记的目录会被 `check` 拒绝。
 
+## 三条核心实现纪律
+
+- **编排核单一判定源**：状态/门禁/下一步判定只存在于 flowgate_lib，hooks 与命令只是呈现面（JSON 与文本永不漂移）。
+- **SKILL.md 是生成物**：改内容改 `scripts/templates/workflows.py` 模板源，再跑 `scripts/generate_skills.py`；parity 测试强制一致。
+- **accepted 只能由用户写入**：`advance` 是唯一入口；agent 永远不能代替用户验收；override 必须用户发起 + 理由留痕。
+
 ## 实现规格参照
 
 - 设计文档（单一权威）：`docs/superpowers/specs/2026-09-22-devflow-plugin-design.md`
