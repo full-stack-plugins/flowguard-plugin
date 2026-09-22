@@ -62,6 +62,13 @@ TIER2_REFS = {
 
 OK_STATUSES = ("accepted", "skipped", "overridden")
 
+# 构建/发布类 Bash 命令模式（gate 钩子用于把 Bash 归类为 build_release 动作）
+RELEASE_CMD_PATTERNS = (
+    "mvn deploy", "mvn release", "gradle publish", "gradle release",
+    "npm publish", "yarn publish", "pnpm publish", "cargo publish",
+    "docker push", "helm push", "twine upload", "make release",
+)
+
 
 def install_cmd(skill, pkg):
     return f"npx skills add full-stack-skills/{pkg} --skill {skill}"
