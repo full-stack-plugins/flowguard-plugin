@@ -56,6 +56,18 @@ class DegradeTest(unittest.TestCase):
         down = state.degrade_from(owner, "requirements")
         self.assertEqual(sorted(down), ["docs", "requirements"])
 
+class OverrideTest(unittest.TestCase):
+    def test_any_status_to_overridden(self):
+        for frm in STATUSES:
+            owner = {"stages": {"s": {"status": frm}}}
+            state.transition_override(owner, "s", reason="hotfix 需求")
+            self.assertEqual(owner["stages"]["s"]["status"], "overridden")
+
+    def test_reason_required(self):
+        owner = {"stages": {"s": {"status": "pending"}}}
+        with self.assertRaises(state.StateError):
+            state.transition_override(owner, "s", reason="")
+
 class LockAndIOTest(unittest.TestCase):
     def setUp(self):
         self.root = Path(tempfile.mkdtemp())

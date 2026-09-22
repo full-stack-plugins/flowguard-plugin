@@ -31,5 +31,7 @@ def check_action(root, action, *, path=None, feature=None):
         fstate = state.load_feature(root, fid) if fid else None
     except state.StateError:
         return {"allowed": True, "envelope": None}
+    if action == "write_code" and _classify(project, path) == "artifact":
+        return {"allowed": True, "envelope": None}  # 产物类放行（spec §5.3）
     allowed, env = registry.unlock_check(action, project, fstate, path=path)
     return {"allowed": allowed, "envelope": env}

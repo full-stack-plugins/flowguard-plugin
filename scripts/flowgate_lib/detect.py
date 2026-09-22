@@ -75,5 +75,8 @@ def _walk(base):
 
 def init_project(root):
     """建 .flowgate/ 骨架（实现在 templates/artifacts.py，此处委托保持单入口）。"""
-    from ..templates.artifacts import init_project as _init
+    try:
+        from ..templates.artifacts import init_project as _init
+    except ImportError:  # pragma: no cover 脚本态
+        from templates.artifacts import init_project as _init
     return _init(root)

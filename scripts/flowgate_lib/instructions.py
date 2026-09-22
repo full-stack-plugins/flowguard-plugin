@@ -20,7 +20,7 @@ def build(root, artifact_id, feature=None):
         raise KeyError(f"未知 artifact: {artifact_id}")
     cfg = load_config(root)
     stage = art["stage"]
-    template = f"skills/flowgate-{stage}/references/templates/{artifact_id}-{_TEMPLATE_NAMES[artifact_id]}"
+    template = f"skills/flowgate-{stage}/references/templates/{_TEMPLATE_NAMES[artifact_id]}"
     tier2 = [(skill, pkg, registry.install_cmd(skill, pkg))
              for skill, pkg in registry.TIER2_REFS.get(stage, [])]
     return {

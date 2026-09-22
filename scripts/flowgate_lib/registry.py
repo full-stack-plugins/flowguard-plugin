@@ -173,12 +173,14 @@ def _load_active_feature_stages(project, fid):
 
 
 def match_module(project, path):
-    """路径 → 模块名；不在任何 src_roots 返回 None。"""
+    """路径 → 模块名；不在任何 src_roots 返回 None。src_roots 为 "." 表示整仓。"""
     if not path:
         return None
-    p = str(path).lstrip("./")
+    p = str(path).replace("\\", "/")
     for name, mod in (project.get("modules") or {}).items():
         for sr in mod.get("src_roots", []):
+            if sr == ".":
+                return name
             if p == sr or p.startswith(sr.rstrip("/") + "/"):
                 return name
     return None

@@ -110,6 +110,14 @@ def transition_stage(owner, stage, target, *, reason="", evidence=None):
         owner["stages"][stage]["evidence"] = evidence
 
 
+def transition_override(owner, stage, *, reason):
+    """override 逃生口：任意态 → overridden（spec §4.4），必须用户发起 + 理由。"""
+    if not reason:
+        raise StateError("override 必须填写理由")
+    owner["stages"][stage]["status"] = "overridden"
+    owner["stages"][stage]["reason"] = reason
+
+
 def degrade_from(owner, stage):
     """stage 及其下游中已 accepted/pending_acceptance 的阶段降回 in_progress，返回被降级列表。"""
     chain = [stage] + [s for s in DOWNSTREAM.get(stage, ()) if s in owner["stages"]]
