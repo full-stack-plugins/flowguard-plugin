@@ -1,0 +1,15 @@
+{
+  "name": "flowgate",
+  "version": "0.1.0+codex.20260922",
+  "interface": {
+    "displayName": "研发流程门禁",
+    "shortDescription": "全栈研发生命周期编排与阶段门禁",
+    "longDescription": "十阶段 SDLC 流水线：需求分析、架构设计、技术方案、测试用例、概要设计、详细设计、编码规范、代码审查、文档生成、部署交付。多功能并行、模块归属判定、硬门禁留痕、REQ 追溯。",
+    "category": "developer-tools",
+    "capabilities": ["workflow-orchestration", "quality-gates"],
+    "brandColor": "#0F766E",
+    "logo": "assets/logo.png",
+    "privacyPolicyURL": "https://github.com/full-stack-plugins/flowgate-plugin/blob/main/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/full-stack-plugins/flowgate-plugin/blob/main/TERMS.md"
+  }
+}

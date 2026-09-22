@@ -1,0 +1,13 @@
+{
+  "name": "flowgate",
+  "version": "0.1.0",
+  "interface": { "displayName": "研发流程门禁", "shortDescription": "全栈研发生命周期编排与阶段门禁", "category": "development" },
+  "skills": "./skills/",
+  "commands": "./commands/",
+  "hooks": [
+    { "event": "SessionStart", "command": "python3 ./hooks/flowgate_status_summary.py", "timeout": 30 },
+    { "event": "PreToolUse", "command": "python3 ./hooks/flowgate_gate.py", "timeout": 120 },
+    { "event": "PostToolUse", "command": "python3 ./hooks/flowgate_artifact_check.py", "timeout": 60 },
+    { "event": "Stop", "command": "python3 ./hooks/flowgate_stage_summary.py", "timeout": 30 }
+  ]
+}
