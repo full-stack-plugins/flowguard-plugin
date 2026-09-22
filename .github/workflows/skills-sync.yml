@@ -1,0 +1,56 @@
+name: skills-sync
+
+on:
+  schedule:
+    - cron: "41 3 * * *"
+  repository_dispatch:
+    types: [skills-updated]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Optional: force one package to a specific immutable tag (pkg=vX.Y.Z)"
+        required: false
+      sha:
+        description: "Optional: expected commit sha (pkg=sha)"
+        required: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Update vendored skills from upstream tags
+        run: |
+          ARGS=""
+          if [ -n "${{ github.event.inputs.ref }}" ]; then ARGS="$ARGS --source-ref ${{ github.event.inputs.ref }}"; fi
+          if [ -n "${{ github.event.inputs.sha }}" ]; then ARGS="$ARGS --expected-sha ${{ github.event.inputs.sha }}"; fi
+          python3 scripts/vendor/skill_vendor.py update $ARGS
+      - name: Verify
+        run: |
+          python3 scripts/vendor/skill_vendor.py check --offline
+          python3 scripts/vendor/skill_vendor.py check
+      - name: Regenerate skills (parity guard)
+        run: |
+          python3 scripts/generate_skills.py
+          git diff --exit-code skills/
+      - name: Open sync PR when skills changed
+        run: |
+          if git diff --quiet; then
+            echo "skills up to date"
+            exit 0
+          fi
+          git config user.name "flowgate-sync-bot"
+          git config user.email "noreply@full-stack-plugins.dev"
+          git checkout -b chore/skills-sync
+          git add skills skills.lock.json
+          git commit -m "chore(skills-sync): 同步上游技能快照"
+          git push --force-with-lease origin chore/skills-sync
+          gh pr create --title "chore(skills-sync): 同步上游技能快照" \
+            --body "上游技能 tag 变更，vendor 快照已更新。请审阅后合并。" || true
+        env:
+          GH_TOKEN: ${{ github.token }}
