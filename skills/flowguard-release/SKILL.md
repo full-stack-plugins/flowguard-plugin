@@ -1,11 +1,13 @@
 ---
 name: flowguard-release
 license: Apache-2.0
-description: 部署交付阶段（项目级收口）。当所有功能 done 后做交付收口、写发布清单时使用。不要在还有 active 功能时尝试发布（门禁会阻断）。
-compatibility: 需要项目内已运行 /flowguard-init 且存在 current_feature（项目级阶段除外）；阶段推进经由编排核 CLI。
+description: 兼容模式，仅当项目已有旧 .flowguard 十阶段状态或用户明确要求旧流程时使用。部署交付阶段（项目级收口）。当所有功能 done 后做交付收口、写发布清单时使用。不要在还有 active 功能时尝试发布（门禁会阻断）。
+compatibility: 旧十阶段兼容层；需要项目已有 .flowguard/project.json，阶段推进经由编排核 CLI。
 ---
 
 # flowguard-release —— 产出发布清单 10-release.md：版本/校验和/回滚方案/证据。
+
+> **兼容模式**：仅当项目已有旧 `.flowguard` 十阶段状态，或用户明确要求继续旧流程时使用。新任务先交给 `flowguard` 主技能发现并绑定原生 SDD 事实源。
 
 项目级阶段：全项目走一次。
 

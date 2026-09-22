@@ -1,11 +1,13 @@
 ---
 name: flowguard-lld
 license: Apache-2.0
-description: 详细设计阶段（薄）。当用户要定类职责、表结构、接口字段时使用。不要用它重复概要设计的模块划分。
-compatibility: 需要项目内已运行 /flowguard-init 且存在 current_feature（项目级阶段除外）；阶段推进经由编排核 CLI。
+description: 兼容模式，仅当项目已有旧 .flowguard 十阶段状态或用户明确要求旧流程时使用。详细设计阶段（薄）。当用户要定类职责、表结构、接口字段时使用。不要用它重复概要设计的模块划分。
+compatibility: 旧十阶段兼容层；需要项目已有 .flowguard/project.json，阶段推进经由编排核 CLI。
 ---
 
 # flowguard-lld —— 产出详细设计 06-lld.md：类/表/接口明细与异常边界。
+
+> **兼容模式**：仅当项目已有旧 `.flowguard` 十阶段状态，或用户明确要求继续旧流程时使用。新任务先交给 `flowguard` 主技能发现并绑定原生 SDD 事实源。
 
 功能级阶段：以 current_feature 为工作对象。
 

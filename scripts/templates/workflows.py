@@ -4,11 +4,11 @@
 SKILL_SPECS = [
     {
         "name": "flowguard", "scope": "router", "stage": None, "artifact": None,
-        "goal": "把研发流程意图路由到正确的阶段技能或执行技能，不亲自实现任何阶段产物。",
-        "description": ("flowguard 研发流程门禁的路由中心。当用户提到流程/阶段/验收/门禁/推进、"
-                        "或不确定该用哪个 flowguard-* 技能时使用；按意图把工作路由到十个阶段技能，"
-                        "lint/CVE/安全等治理需求路由给 codeguard-plugin。"
-                        "不要用它直接编写需求或测试用例（那是阶段技能的职责）。"),
+        "goal": "驱动智能体发现并遵循适用的 SDD 流程，用确定性证据防止绕过必要步骤。",
+        "description": ("Git 项目的智能体 SDD 治理入口。在会话开始、目标仓库或任务范围变化、"
+                        "开始写码、提交或发布前使用；发现 Spec Kit/OpenSpec/Superpowers 原生产物，"
+                        "分类任务并绑定会话+worktree+变更上下文，检查批准、依赖和证据。"
+                        "不复制规格正文，不自动初始化工具，也不以固定十阶段代替智能体判断。"),
         "routes": [
             "flowguard-requirements → 需求分析（01）",
             "flowguard-architecture → 架构设计（02，项目级）",
@@ -141,43 +141,66 @@ def render_skill(spec):
     """渲染单个 SKILL.md（统一骨架：frontmatter→目标→30秒开始→边界→模板→自检→验收→硬软分离）。"""
     name = spec["name"]
     if spec["scope"] == "router":
-        routes = "\n".join(f"- {r}" for r in spec["routes"])
         return f"""---
 name: {name}
 license: Apache-2.0
 description: {spec['description']}
-compatibility: 需要项目内已运行 /flowguard-init；所有状态查询经由编排核 CLI，只读。
+compatibility: Python 3 标准库；Git 项目无需预先初始化 FlowGuard。原生 SDD 工具是否可用以 discover 结果为准。
 ---
 
-# flowguard —— 研发流程门禁 · 路由中心
+# flowguard —— 智能体驱动的 SDD 治理
 
-把研发流程意图路由到正确的阶段技能或执行技能。流水线：需求分析 → 架构设计 → 技术方案 → 测试用例 → 概要设计 → 详细设计 → 编码规范 → 代码审查 → 文档生成 → 部署交付（十阶段）。
+智能体负责语义判断和流程推进；Spec Kit、OpenSpec、Superpowers 提供原生规格与工程方法；FlowGuard 只保存治理元数据、校验证据并阻止绕过。
 
 ## 30 秒开始
 
 ```bash
-{_cli(name)} status        # 流程看板
-{_cli(name)} gate          # 四类动作放行状态
+{_cli(name)} discover --json
+{_cli(name)} context show --session "$SESSION_ID" --json
+{_cli(name)} governance --session "$SESSION_ID" --action code_write --json
 ```
 
-## REQUIRED ROUTER
+## 智能体执行循环
 
-{routes}
+1. **发现**：确认真实仓库/worktree、项目类型、项目指令、原生 SDD 标识、可用 CLI 和已有变更。
+2. **定位**：判断 `read_only`、`simple_change`、`important_change` 或 `incident`，确认是已有变更、父功能、子功能还是实现任务。
+3. **选择**：按“用户指定 → 项目指令 → 已有产物 → 已采用体系 → 默认规则”确定唯一规格事实源。
+4. **绑定**：用 `context bind` 将会话 + worktree + task 绑定到原生规格引用；只保存引用，不复制正文。
+5. **推进**：调用所选体系的真实命令或技能。Spec Kit/OpenSpec 管规格，Superpowers 管工程执行。
+6. **验证**：运行真实测试、CodeGuard 静态检查和 CodeReview 语义审查，用 `evidence record` 绑定当前代码指纹。
+7. **复核**：写码、`git commit`、发布前运行 `governance`；缺失时执行 `allowed_actions` 中的补救路径。
+8. **恢复**：下一轮从 active 上下文、原生产物和有效证据继续，不重复生成已完成材料。
 
-## 流程操作入口（命令）
+## 规格事实源选择
 
-/flowguard-init · /flowguard-feature · /flowguard-next · /flowguard-advance · /flowguard-gate · /flowguard-override
+| 发现结果 | 行为 |
+|:---|:---|
+| 只有 `.specify/` | Spec Kit 是规格事实源 |
+| 只有 `openspec/` | OpenSpec 是规格事实源 |
+| 只有 Superpowers specs/plans | 延续 Superpowers 文档 |
+| Spec Kit/OpenSpec + Superpowers | 前者管规格，后者管工程执行 |
+| `.specify/` 与 `openspec/` 冲突 | 停止创建规格，请用户为本次变更选择 |
+| 无体系 + simple/read-only | 不初始化完整 SDD |
+| 无体系 + important Brownfield | 推荐 OpenSpec，说明文件影响后等待初始化批准 |
+| 无体系 + important Greenfield | 推荐 Spec Kit，说明文件影响后等待初始化批准 |
 
-## 硬性约束（会被门禁/校验强制）
+## 必须由用户决定
 
-- 写业务源码前：需求/方案/用例/概设/详设全部 accepted（TDD 门槛），项目规范已生成
-- 验收（accepted）只能由用户确认写入；override 必须用户发起 + 理由留痕
-- 状态只能经编排核 CLI 变更；手改 state.json 视为破坏
+- 首次 `specify init` / `openspec init`、工具安装升级或体系迁移。
+- Spec Kit 与 OpenSpec 无法自动判定的冲突。
+- 核心目标、非目标、验收标准和公共兼容范围变化。
+- `scope_approved`、`user_acceptance` 和任何 override。
 
-## 软约束（prompt 级契约，靠执行者自觉）
+## 证据与插件分工
 
-- 产物遵守模板与元信息头；项目级产物增补一律追加式
-- 跨技能引用只用「技能名 + 安装命令」
+- FlowGuard：流程归属、前置条件、父子依赖、证据有效性和最终动作门禁。
+- CodeGuard：测试、lint、构建、依赖与凭据检查，作为 `tests/static_analysis` 证据。
+- CodeReview：基于正式规格和代码上下文输出语义风险，作为 `semantic_review` 证据。
+- 机器 PASS 不自动成为用户验收；代码变化使可过期证据失效。
+
+## 兼容模式
+
+旧 `.flowguard/project.json` 与十阶段命令只用于已有项目迁移。仅当检测到旧状态或用户明确要求时，才路由到 `flowguard-requirements` 等阶段技能；新任务不得默认生成十份 `.flowguard` 规格。
 """
 
 
@@ -196,14 +219,20 @@ compatibility: 需要项目内已运行 /flowguard-init；所有状态查询经�
         "testcases": "validate 无 ERROR：REQ 全覆盖、测试文件全部存在",
         "standards": "规范集覆盖全部模块栈，用户确认验收",
     }.get(stage, "validate 无 ERROR 且用户确认验收")
+    legacy_description = (
+        "兼容模式，仅当项目已有旧 .flowguard 十阶段状态或用户明确要求旧流程时使用。"
+        + spec["description"]
+    )
     return f"""---
 name: {name}
 license: Apache-2.0
-description: {spec['description']}
-compatibility: 需要项目内已运行 /flowguard-init 且存在 current_feature（项目级阶段除外）；阶段推进经由编排核 CLI。
+description: {legacy_description}
+compatibility: 旧十阶段兼容层；需要项目已有 .flowguard/project.json，阶段推进经由编排核 CLI。
 ---
 
 # {name} —— {spec['goal']}
+
+> **兼容模式**：仅当项目已有旧 `.flowguard` 十阶段状态，或用户明确要求继续旧流程时使用。新任务先交给 `flowguard` 主技能发现并绑定原生 SDD 事实源。
 
 {scope_note}
 
@@ -246,4 +275,3 @@ compatibility: 需要项目内已运行 /flowguard-init 且存在 current_featur
 - 遵守 instructions 返回的 context/rules（约束，不是产物内容）
 - 引用 Tier 2 执行技能时给出安装命令
 """
-

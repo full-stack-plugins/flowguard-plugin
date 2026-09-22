@@ -1,11 +1,13 @@
 ---
 name: flowguard-review
 license: Apache-2.0
-description: 代码审查阶段（薄）。当用户要求审查某功能的代码变更、或汇总审查发现项时使用；每条发现项必须带证据与结论。不要用它跑静态检查工具（codeguard-plugin 职责）。
-compatibility: 需要项目内已运行 /flowguard-init 且存在 current_feature（项目级阶段除外）；阶段推进经由编排核 CLI。
+description: 兼容模式，仅当项目已有旧 .flowguard 十阶段状态或用户明确要求旧流程时使用。代码审查阶段（薄）。当用户要求审查某功能的代码变更、或汇总审查发现项时使用；每条发现项必须带证据与结论。不要用它跑静态检查工具（codeguard-plugin 职责）。
+compatibility: 旧十阶段兼容层；需要项目已有 .flowguard/project.json，阶段推进经由编排核 CLI。
 ---
 
 # flowguard-review —— 产出证据化代码审查报告 08-review.md：发现项（证据）+ 结论（fix/wontfix/deferred）。
+
+> **兼容模式**：仅当项目已有旧 `.flowguard` 十阶段状态，或用户明确要求继续旧流程时使用。新任务先交给 `flowguard` 主技能发现并绑定原生 SDD 事实源。
 
 功能级阶段：以 current_feature 为工作对象。
 

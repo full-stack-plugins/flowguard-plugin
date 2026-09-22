@@ -33,7 +33,14 @@ class ManifestContractTest(unittest.TestCase):
     def test_kimi_inlines_hooks(self):
         m = self._load("kimi.plugin.json")
         events = {h["event"] for h in m["hooks"]}
-        self.assertEqual(events, {"SessionStart", "PreToolUse", "PostToolUse", "Stop"})
+        self.assertEqual(events, {"SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "Stop"})
+
+    def test_claude_hooks_cover_agent_governance_loop(self):
+        hooks = self._load("hooks/hooks.json")["hooks"]
+        self.assertEqual(
+            set(hooks),
+            {"SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "Stop"},
+        )
 
     def test_agents_marketplace_source(self):
         p = self._load(".agents/plugins/marketplace.json")["plugins"][0]

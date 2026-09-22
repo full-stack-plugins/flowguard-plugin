@@ -1,9 +1,9 @@
 {
   "name": "flowguard",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "interface": {
     "displayName": "研发流程门禁",
-    "shortDescription": "研发流程门禁：十阶段 SDLC 硬门禁编排",
+    "shortDescription": "智能体 SDD 治理：原生规格、证据与提交门禁",
     "category": "development"
   },
   "skills": "./skills/",
@@ -12,6 +12,11 @@
     {
       "event": "SessionStart",
       "command": "python3 ./hooks/flowguard_status_summary.py",
+      "timeout": 30
+    },
+    {
+      "event": "UserPromptSubmit",
+      "command": "python3 ./hooks/flowguard_prompt_guard.py",
       "timeout": 30
     },
     {
@@ -30,5 +35,5 @@
       "timeout": 30
     }
   ],
-  "description": "SDLC orchestration plugin with hard stage gates: a ten-stage pipeline (requirements, architecture, solution, test cases, HLD, LLD, coding standards, review, docs, release) across multiple features and modules."
+  "description": "Agent-driven SDD governance for Codex, ZCode, Kimi and Claude: native Spec Kit/OpenSpec/Superpowers discovery, session-worktree task binding, evidence freshness and deterministic code/commit/release gates."
 }

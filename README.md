@@ -1,72 +1,104 @@
-# FlowGuard · 研发流程门禁
+# FlowGuard · Agent-Driven SDD Governance
 
 [![skills-check](https://github.com/full-stack-plugins/flowguard-plugin/actions/workflows/skills-check.yml/badge.svg)](https://github.com/full-stack-plugins/flowguard-plugin/actions/workflows/skills-check.yml)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-Four-host plugin (ZCode / Codex / Kimi / Claude) that orchestrates the full SDLC as a **ten-stage pipeline with hard stage gates**: Requirements → Architecture → Solution → Test Cases → HLD → LLD → Coding Standards → Code Review → Docs → Release.
+FlowGuard is an agent governance plugin for Codex, ZCode, Kimi, and Claude. **The agent decides how to advance the task; native SDD tools own specifications and engineering methods; FlowGuard prevents required context, approvals, dependencies, and evidence from being skipped.**
 
-## Positioning
+## Responsibilities
 
-flowguard is a **process orchestrator**, not a toolbox: it manages stage progression, artifact hand-offs and gate enforcement for multiple features across multiple modules. Inspiration: [OpenSpec](https://github.com/Fission-AI/OpenSpec) (MIT) — see THIRD-PARTY-NOTICES.md.
+- Spec Kit / OpenSpec own the native specification source of truth.
+- Superpowers provides execution methods such as clarification, planning, TDD, debugging, review, and verification.
+- FlowGuard discovers repository state, binds `session + worktree + task/change`, validates dependencies and evidence, and gates code writes, commits, and releases.
+- CodeGuard produces deterministic test, static-analysis, build, dependency, and credential evidence.
+- CodeReview produces semantic-review evidence grounded in the selected specification and code context.
 
-## At a glance
+FlowGuard does not copy specifications, silently initialize tools, or turn a machine PASS into user acceptance.
 
-- **Ten stages**, each producing a traceable artifact under `.flowguard/`
-- **Three-level model**: project-level stages (architecture / standards / release) run once; feature-level pipelines (requirements → solution → testcases → hld → lld → review → docs) run per feature, in parallel; modules annotate code ownership
-- **Hard gates**: writing business code requires accepted requirements+solution+testcases+hld+lld (TDD gate) and generated standards; PreToolUse hook blocks with `exit 2` and a diagnostic envelope `{severity, code, message, fix}`
-- **Human-in-the-loop**: `accepted` can only be written by the user (`/flowguard-advance`); the only escape is a user-initiated, journaled `/flowguard-override`
-- **Traceability**: every test case references its REQ id and its test file; coverage is checked mechanically
+## Governance loop
+
+```mermaid
+flowchart LR
+    D[Discover Git / SDD] --> C[Agent classifies and selects]
+    C --> B[Bind context]
+    B --> N[Advance native specs and implementation]
+    N --> E[Tests / CodeGuard / CodeReview]
+    E --> G[FlowGuard action decision]
+    G -->|Missing| C
+    G -->|Satisfied| A[Allow code / commit / release]
+```
+
+The required rule is “follow the applicable process,” not “run every task through a fixed pipeline.”
+
+| Task type | Default governance |
+|:---|:---|
+| Read-only analysis | Discover and classify; no initialization required |
+| Simple change | Lightweight context plus current-fingerprint verification |
+| Important change | Bind a native specification, capture required approval, execute with TDD |
+| Production incident | Restore stability first; backfill behavior-changing specifications |
 
 ## Quick start
 
 ```bash
-# in your project root
-/flowguard-init                                     # scaffold .flowguard/, detect stack & modules
-/flowguard-feature new order-refund --modules order # declare a feature and its modules
-/flowguard-next                                     # start the current stage, get machine-read instructions
-# ... produce the stage artifact (skill routes to executors) ...
-/flowguard-advance                                  # user acceptance -> accepted
+/flowguard-discover    # read-only; never installs or initializes tools
+/flowguard-context     # classify and bind this session/worktree/task
+/flowguard-evidence    # record real verification evidence
+/flowguard-governance  # check code-write, commit, or release readiness
 ```
 
-AI entry points: `/flowguard-status`, `/flowguard-gate`, `/flowguard-override` (journaled escape hatch).
+CLI example:
 
-## Commands & Hooks
+```bash
+python3 scripts/flowguard_state.py discover --json
+python3 scripts/flowguard_state.py context bind \
+  --session session-1 --task-id refund-idempotency \
+  --task-type important_change --spec-system openspec \
+  --spec-ref openspec/changes/refund-idempotency --json
+python3 scripts/flowguard_state.py governance \
+  --session session-1 --action code_write --json
+```
 
-Commands: `/flowguard-init | -feature | -status | -next | -advance | -gate | -override`.
+## Action gates
 
-CLI subcommands (`python3 scripts/flowguard_state.py <cmd>`, exit codes: 0 ok / 2 gate-blocked / 3 error):
+| Action | Minimum condition |
+|:---|:---|
+| Read / specification remediation | Always open so a block can be resolved |
+| Test write | Active governance context |
+| Business-code write | Writable task; important changes also need a valid spec and scope approval |
+| `git commit` | Current-fingerprint tests, static analysis, and semantic review |
+| Release | Commit conditions plus release readiness, user acceptance, and completed dependencies/children |
 
-| subcommand | 作用 |
-|---|---|
-| `init` | 建 `.flowgate/` 骨架（幂等） |
-| `status [--feature X]` | 流程看板（单功能详情用 --feature） |
-| `feature new <id> --modules <m...>` / `list` / `done` / `drop --reason R` | 功能生命周期 |
-| `next [--feature X \| --stage S]` | 开始阶段并取回机读指令 |
-| `advance [--feature X] [--stage S]` | 用户验收（accepted 唯一写入点） |
-| `override --reason R [...]` | 留痕逃生 |
-| `gate [--action A --path P]` | 门禁自检 / 定向判定 |
-| `validate [--feature X]` | 产物机械校验 |
-| `instructions <artifact> [--feature X]` | 阶段指令（context/rules/模板/Tier2） |
-Hooks: SessionStart (status digest), PreToolUse (hard gate, exit 2), PostToolUse (artifact validation + rework degradation), Stop (next-step digest). Contract: [hooks/\_\_protocol\_\_.md](hooks/__protocol__.md).
+Denials use exit code 2 and return `code / message / fix / missing / allowed_actions`. Hook failures fail open; known governance gaps fail closed.
 
-## Docs
+## Hooks
 
-- [docs/architecture.md](docs/architecture.md) — 架构（四层/三级模型/门禁）
-- [docs/FLOWGUARD_ARTIFACT_SPEC.md](docs/FLOWGUARD_ARTIFACT_SPEC.md) — 产物格式契约（十类产物 + 占位符规则）
-- [docs/roadmap.md](docs/roadmap.md) — Phase 2/3 路线图与开放问题
+- `SessionStart`: discover SDD state and restore context.
+- `UserPromptSubmit`: remind the agent to reassess task, scope, and source of truth.
+- `PreToolUse`: gate code writes, Git commits, and releases; protect governance state.
+- `PostToolUse`: expire stale evidence and observe explicit test/check exit codes.
+- `Stop`: summarize missing evidence and the next action without treating the turn as task completion.
+
+See [hooks/__protocol__.md](hooks/__protocol__.md).
+
+## Legacy compatibility
+
+The v0.1 ten-stage `.flowguard` artifacts and commands remain available for existing projects. They are compatibility-only: new tasks no longer create ten specification copies or rely on one global `current_feature`.
+
+## Documentation
+
+- [Current architecture](docs/FlowGuard-Architecture.zh_CN.md)
+- [Agent-driven SDD governance specification](docs/superpowers/specs/2026-09-23-flowguard-agent-driven-sdd-governance.md)
+- [Implementation plan](docs/superpowers/plans/2026-09-23-flowguard-agent-driven-sdd-governance.md)
+- [Legacy artifact contract](docs/FLOWGUARD_ARTIFACT_SPEC.md)
+- [Roadmap](docs/roadmap.md)
 
 ## Verification
 
 ```bash
-python3 -m unittest discover -s tests            # state machine, gate matrix, hooks, parity...
+python3 -m unittest discover -s tests -v
 python3 scripts/vendor/skill_vendor.py check --offline
-python3 scripts/generate_skills.py && git diff --exit-code skills/
+python3 scripts/generate_skills.py
+git diff --check
 ```
 
-## Compatibility
-
-ZCode (convention-based hook discovery), Kimi (inline hooks manifest), Codex & Claude (`hooks/hooks.json`). POSIX only (fcntl lock). Python stdlib only.
-
-## License
-
-Apache-2.0. OpenSpec (MIT) implementation reference — see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). Related skills: install executors via `npx skills add full-stack-skills/<pkg> --skill <name>`; lint governance via `npx skills add full-stack-plugins/codeguard`.
+Python standard library only. Apache-2.0; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for implementation references.

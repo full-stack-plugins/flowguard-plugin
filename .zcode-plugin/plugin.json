@@ -5,11 +5,11 @@
     "en": "研发流程门禁",
     "zh-CN": "研发流程门禁"
   },
-  "version": "0.1.2",
-  "description": "SDLC orchestration plugin with hard stage gates: a ten-stage pipeline (requirements, architecture, solution, test cases, HLD, LLD, coding standards, review, docs, release) across multiple features and modules.",
+  "version": "0.2.0",
+  "description": "Agent-driven SDD governance for Codex, ZCode, Kimi and Claude: native Spec Kit/OpenSpec/Superpowers discovery, session-worktree task binding, evidence freshness and deterministic code/commit/release gates.",
   "description_i18n": {
-    "en": "SDLC orchestration with hard stage gates across requirements, solution design, test cases, HLD, LLD, coding standards, review, docs and release.",
-    "zh-CN": "全栈研发生命周期编排与阶段门禁：十阶段流程管理，多功能多模块适配，硬门禁留痕。"
+    "en": "Agent-driven SDD governance with native specification discovery, task-context binding, evidence freshness, and deterministic commit/release gates.",
+    "zh-CN": "智能体驱动的 SDD 治理：发现原生规格，绑定任务上下文，校验证据新鲜度，并确定性拦截不合规提交与发布。"
   },
   "author": {
     "name": "full-stack-plugins",
@@ -20,6 +20,8 @@
   "license": "Apache-2.0",
   "keywords": [
     "sdlc",
+    "sdd",
+    "agent-governance",
     "requirements",
     "testing",
     "code-review",

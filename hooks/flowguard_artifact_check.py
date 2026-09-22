@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""PostToolUse：产物完整性校验 + 回改降级 + journal 留痕（恒 exit 0）。协议见 __protocol__.md。"""
+"""PostToolUse：证据采集/失效 + 旧产物校验与降级（恒 exit 0）。"""
+import hashlib
 import json
 import os
 import sys
@@ -8,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from flowguard_lib import journal, state, validation  # noqa: E402
+from flowguard_lib import context, evidence, journal, state, validation  # noqa: E402
 
 # artifact 文件名 → 阶段（用于降级与校验路由）
 ARTIFACT_STAGE = {
@@ -17,6 +18,31 @@ ARTIFACT_STAGE = {
     "05-hld": "hld", "06-lld": "lld", "07-standards": "standards",
     "08-review": "review", "09-docs": "docs", "10-release": "release",
 }
+
+TEST_COMMANDS = ("pytest", "unittest", "mvn test", "gradle test", "npm test", "pnpm test", "cargo test")
+STATIC_COMMANDS = (
+    "codeguard check", "codeguard-check", "codeguard-java", "codeguard-security-code",
+    " lint", "eslint", "clippy", "checkstyle", "spotbugs", "ruff check",
+)
+REVIEW_COMMANDS = ("codereview", "code-review")
+
+
+def _evidence_kind(command):
+    command = f" {command.lower()} "
+    if any(pattern in command for pattern in TEST_COMMANDS):
+        return "tests"
+    if any(pattern in command for pattern in STATIC_COMMANDS):
+        return "static_analysis"
+    if any(pattern in command for pattern in REVIEW_COMMANDS):
+        return "semantic_review"
+    return None
+
+
+def _exit_code(payload):
+    response = payload.get("tool_response") or payload.get("tool_result") or {}
+    if isinstance(response, dict) and isinstance(response.get("exit_code"), int):
+        return response["exit_code"]
+    return None
 
 
 def _parse_artifact(path):
@@ -47,6 +73,33 @@ def main():
     tool_input = payload.get("tool_input") or {}
     file_path = tool_input.get("file_path")
     cwd = Path(payload.get("cwd") or os.getcwd())
+    session_id = payload.get("session_id") or payload.get("conversation_id") or "default"
+    try:
+        active = context.active(cwd, session_id)
+        stale = evidence.refresh_staleness(cwd, active["context_id"]) if active else []
+        if stale:
+            print(f"[flowguard] 代码/规格已变化，证据已过期: {', '.join(stale)}", file=sys.stderr)
+    except Exception:
+        active = None
+    if payload.get("tool_name") == "Bash" and active:
+        command = tool_input.get("command") or ""
+        kind = _evidence_kind(command)
+        exit_code = _exit_code(payload)
+        if kind and exit_code is not None:
+            command_hash = hashlib.sha256(command.encode("utf-8")).hexdigest()[:16]
+            try:
+                rec = evidence.record(
+                    cwd, active["context_id"], kind=kind, producer="hook:bash",
+                    result="pass" if exit_code == 0 else "fail",
+                    summary=f"受观察命令 exit_code={exit_code}",
+                    source_ref=f"command-sha256:{command_hash}",
+                )
+                print(
+                    f"[flowguard] 已记录证据 {rec['evidence_id']} ({kind}, {rec['result']})",
+                    file=sys.stderr,
+                )
+            except Exception:
+                pass
     info = _parse_artifact(file_path) if file_path else None
     if not info:
         return 0

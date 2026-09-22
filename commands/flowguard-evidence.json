@@ -1,0 +1,5 @@
+{
+  "name": "flowguard-evidence",
+  "description": "记录并查询与当前代码指纹绑定的测试、静态检查、语义审查和验收证据",
+  "prompt": "管理 FlowGuard 证据：\n\n1. 先执行真实检查，不得仅凭模型声明 PASS\n2. 记录：`python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" evidence record --context-id <id> --kind <spec_verified|tests|static_analysis|semantic_review|user_acceptance|release_readiness> --producer <工具> --result <pass|fail|warning> --summary <摘要> --source-ref <报告或命令引用> --json`\n3. 查询：`... flowguard_state.py evidence list --context-id <id> --json`\n4. CodeGuard 结果只记 static_analysis/tests；CodeReview 结果只记 semantic_review；user_acceptance 只能来自用户明确确认\n5. 代码或规格变化后，expires_on_change 证据会变成 stale，必须重跑\n\n禁止把文件存在、HTTP 200、tasks 打勾或模型一句“通过”当成充分证据。"
+}

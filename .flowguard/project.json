@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "project": "flowguard-plugin",
+  "stack": {
+    "backend": null,
+    "frontend": "vue3",
+    "detected_at": "2026-09-22T15:58:06.177622+00:00"
+  },
+  "modules": {
+    "scripts": {
+      "src_roots": [
+        "scripts"
+      ],
+      "stack": "python"
+    },
+    "hooks": {
+      "src_roots": [
+        "hooks"
+      ],
+      "stack": "python"
+    }
+  },
+  "current_feature": "journal-restore",
+  "stages": {
+    "architecture": {
+      "status": "in_progress",
+      "artifact": "project/02-architecture.md"
+    },
+    "standards": {
+      "status": "in_progress",
+      "artifact": "project/07-standards.md"
+    },
+    "release": {
+      "status": "pending",
+      "artifact": "project/10-release.md"
+    }
+  },
+  "features": {
+    "journal-restore": {
+      "status": "active",
+      "path": "features/journal-restore"
+    }
+  }
+}

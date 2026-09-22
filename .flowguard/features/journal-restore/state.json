@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "feature": "journal-restore",
+  "title": "journal 恢复工具",
+  "modules": [
+    "scripts"
+  ],
+  "status": "active",
+  "stages": {
+    "requirements": {
+      "status": "in_progress",
+      "artifact": "artifacts/01-requirements.md"
+    },
+    "solution": {
+      "status": "in_progress",
+      "artifact": "artifacts/03-solution.md"
+    },
+    "testcases": {
+      "status": "in_progress",
+      "artifact": "artifacts/04-testcases.md"
+    },
+    "hld": {
+      "status": "in_progress",
+      "artifact": "artifacts/05-hld.md"
+    },
+    "lld": {
+      "status": "in_progress",
+      "artifact": "artifacts/06-lld.md"
+    },
+    "review": {
+      "status": "pending",
+      "artifact": "artifacts/08-review.md"
+    },
+    "docs": {
+      "status": "pending",
+      "artifact": "artifacts/09-docs.md"
+    }
+  }
+}

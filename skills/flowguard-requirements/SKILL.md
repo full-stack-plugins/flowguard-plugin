@@ -1,11 +1,13 @@
 ---
 name: flowguard-requirements
 license: Apache-2.0
-description: 需求分析阶段的编排技能。当用户要写需求/用户故事/功能规格、或把模糊想法变成可验收需求时使用；以 current_feature 为工作对象，产出 Requirement/Scenario 结构化需求。不要用它做架构选型或写测试用例（后续阶段职责）。
-compatibility: 需要项目内已运行 /flowguard-init 且存在 current_feature（项目级阶段除外）；阶段推进经由编排核 CLI。
+description: 兼容模式，仅当项目已有旧 .flowguard 十阶段状态或用户明确要求旧流程时使用。需求分析阶段的编排技能。当用户要写需求/用户故事/功能规格、或把模糊想法变成可验收需求时使用；以 current_feature 为工作对象，产出 Requirement/Scenario 结构化需求。不要用它做架构选型或写测试用例（后续阶段职责）。
+compatibility: 旧十阶段兼容层；需要项目已有 .flowguard/project.json，阶段推进经由编排核 CLI。
 ---
 
 # flowguard-requirements —— 产出功能需求产物 01-requirements.md：用户故事 + <feature>/REQ-n + 可验收标准。
+
+> **兼容模式**：仅当项目已有旧 `.flowguard` 十阶段状态，或用户明确要求继续旧流程时使用。新任务先交给 `flowguard` 主技能发现并绑定原生 SDD 事实源。
 
 功能级阶段：以 current_feature 为工作对象。
 

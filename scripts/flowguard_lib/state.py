@@ -54,9 +54,10 @@ def state_lock(root):
         fh.close()
 
 
-def _flowguard_dir(root):
+def _flowguard_dir(root, *, create=False):
     d = pathlib.Path(root) / ".flowguard"
-    d.mkdir(parents=True, exist_ok=True)
+    if create:
+        d.mkdir(parents=True, exist_ok=True)
     return d
 
 
@@ -76,11 +77,11 @@ def load_project(root):
 
 
 def save_project(root, data):
-    _atomic_write(_flowguard_dir(root) / "project.json", data)
+    _atomic_write(_flowguard_dir(root, create=True) / "project.json", data)
 
 
-def _feature_path(root, feature_id):
-    return _flowguard_dir(root) / "features" / feature_id / "state.json"
+def _feature_path(root, feature_id, *, create=False):
+    return _flowguard_dir(root, create=create) / "features" / feature_id / "state.json"
 
 
 def load_feature(root, feature_id):
@@ -91,7 +92,7 @@ def load_feature(root, feature_id):
 
 
 def save_feature(root, data):
-    _atomic_write(_feature_path(root, data["feature"]), data)
+    _atomic_write(_feature_path(root, data["feature"], create=True), data)
 
 
 def transition_stage(owner, stage, target, *, reason="", evidence=None):

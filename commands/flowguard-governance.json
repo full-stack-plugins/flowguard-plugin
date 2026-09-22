@@ -1,0 +1,5 @@
+{
+  "name": "flowguard-governance",
+  "description": "检查读取、补规格、补测试、写码、Git 提交和发布动作是否满足治理前置条件",
+  "prompt": "运行确定性治理检查：`python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" governance --session <session> --action <read|spec_write|test_write|code_write|git_commit|release> [--path <path>] --json`。\n\n- 返回 allowed=true 时，仅表示已满足 FlowGuard 可核验条件，不等于用户验收\n- 返回 exit 2 时，展示 code/message/missing/allowed_actions/fix\n- 优先执行 allowed_actions 中的读取、补规格、补测试、真实检查或请求批准，不要用 override 绕过\n- git_commit 要求当前指纹的 tests、static_analysis、semantic_review；release 另需 release_readiness、user_acceptance 和已完成依赖/子任务\n\n本命令只检查，不自动推进原生 SDD 阶段。"
+}

@@ -1,0 +1,10 @@
+{"ts": "2026-09-22T15:58:06.178340+00:00", "scope": "project", "event": "init", "detail": {"modules": ["web"]}}
+{"ts": "2026-09-22T15:59:05.080688+00:00", "scope": "project", "event": "init", "detail": {"modules": ["web"]}}
+{"ts": "2026-09-22T16:00:24.794819+00:00", "scope": "feature:journal-restore", "event": "feature_new", "detail": {"modules": ["scripts"]}}
+{"ts": "2026-09-22T16:02:32.204047+00:00", "scope": "feature:journal-restore", "event": "next", "detail": {"stage": "requirements"}}
+{"ts": "2026-09-22T16:02:32.253848+00:00", "scope": "project", "event": "next", "detail": {"stage": "architecture"}}
+{"ts": "2026-09-22T16:02:32.296541+00:00", "scope": "feature:journal-restore", "event": "next", "detail": {"stage": "solution"}}
+{"ts": "2026-09-22T16:02:32.399830+00:00", "scope": "feature:journal-restore", "event": "next", "detail": {"stage": "testcases"}}
+{"ts": "2026-09-22T16:02:32.495933+00:00", "scope": "feature:journal-restore", "event": "next", "detail": {"stage": "hld"}}
+{"ts": "2026-09-22T16:02:32.574448+00:00", "scope": "feature:journal-restore", "event": "next", "detail": {"stage": "lld"}}
+{"ts": "2026-09-22T16:02:32.622095+00:00", "scope": "project", "event": "next", "detail": {"stage": "standards"}}

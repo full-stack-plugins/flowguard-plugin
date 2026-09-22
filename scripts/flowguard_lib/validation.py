@@ -103,8 +103,8 @@ def validate_requirements(text, feature):
         if m_scn:
             scenario_count += 1
             continue
-        # stray 头：含关键词但层级/形式不是规范头
-        if re.match(r"^#{1,6}\s", ln) and re.search(r"Requirement|Scenario", ln) and not m_req and not m_scn:
+        # stray 头：含 `Requirement:`/`Scenario:` 冒号标记但层级/形式不是规范头（裸词不误伤）
+        if re.match(r"^#{1,6}\s", ln) and re.search(r"(Requirement|Scenario):", ln) and not m_req and not m_scn:
             issues.append(_issue("ERROR", "01-requirements.md",
                                  f"疑似层级错误的 Requirement/Scenario 头: {stripped!r}",
                                  HINTS["scenario_header"] if "Scenario" in ln else HINTS["req_header"], line=no))
@@ -158,10 +158,14 @@ def validate_testcases(text, req_ids, root):
         if re.match(r"^### 用例", ln):
             flush_case()
             in_case, cur_req, cur_file = True, None, None
-            placeholder = "<" in ln
+            placeholder = ("<" in ln) or ("{{" in ln)
+            continue
+        if in_case and (ln.strip() == "---" or re.match(r"^#{2,4}\s", ln)):
+            flush_case()
+            in_case = False
             continue
         if in_case:
-            if "<" in ln:
+            if "<" in ln or "{{" in ln:
                 placeholder = True
             m_req = re.match(r"^-\s*REQ:\s*(\S+)", ln.strip())
             m_file = re.match(r"^-\s*测试文件:\s*(\S+)", ln.strip())
@@ -169,7 +173,7 @@ def validate_testcases(text, req_ids, root):
                 cur_req = m_req.group(1)
             elif m_file:
                 cur_file = m_file.group(1)
-                if "<" not in cur_file and not (Path(root) / cur_file).exists():
+                if "<" not in cur_file and "{{" not in cur_file and not (Path(root) / cur_file).exists():
                     issues.append(_issue("ERROR", "04-testcases.md",
                                          f"测试文件不存在: {cur_file}",
                                          HINTS["testfile"]))
@@ -208,10 +212,13 @@ def validate_review(text):
         if re.match(r"^#{2,4}\s*发现", ln):
             flush()
             in_finding = True
-            placeholder = "<" in ln
+            placeholder = ("<" in ln) or ("{{" in ln)
+            continue
+        if in_finding and (ln.strip() == "---" or re.match(r"^#{2,4}\s", ln)):
+            flush()
             continue
         if in_finding:
-            if "<" in ln:
+            if "<" in ln or "{{" in ln:
                 placeholder = True
             if re.match(r"^-\s*结论:\s*(fix|wontfix|deferred)\s*$", ln.strip()):
                 concluded = True

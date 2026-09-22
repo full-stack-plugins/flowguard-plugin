@@ -75,6 +75,21 @@ class HookErrorPathTest(unittest.TestCase):
         self.assertEqual(p.returncode, 0)
         self.assertNotIn("Traceback", p.stderr)
 
+    def test_governance_summary_hooks_fail_open_on_corrupt_context_index(self):
+        root = Path(tempfile.mkdtemp())
+        subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+        index = root / ".flowguard" / "contexts" / "index.json"
+        index.parent.mkdir(parents=True)
+        index.write_text("{broken", encoding="utf-8")
+        for hook in ("flowguard_status_summary.py", "flowguard_prompt_guard.py", "flowguard_stage_summary.py"):
+            p = subprocess.run(
+                [sys.executable, str(HOOKS / hook)],
+                input=json.dumps({"cwd": str(root), "session_id": "s"}),
+                capture_output=True, text=True,
+            )
+            self.assertEqual(p.returncode, 0, f"{hook}: {p.stderr}")
+            self.assertNotIn("Traceback", p.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

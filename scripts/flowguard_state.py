@@ -10,7 +10,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from flowguard_lib import detect, gate, ids, instructions, journal, registry, state, validation  # noqa: E402
+from flowguard_lib import (  # noqa: E402
+    context, detect, discovery, evidence, gate, governance, ids, instructions,
+    journal, registry, state, validation,
+)
 from flowguard_lib.diag import emit as emit_diag, envelope as mk_env  # noqa: E402
 from templates import artifacts  # noqa: E402
 
@@ -64,6 +67,74 @@ def cmd_init(args):
     journal.append(root, "project", "init", {"modules": list(project["modules"])})
     _out({"initialized": True, "project": project["project"],
           "modules": list(project["modules"]), "stack": project["stack"]}, args.json)
+
+
+def cmd_discover(args):
+    """只读发现 Git、原生 SDD 标识、CLI 可用性和冲突。"""
+    _out(discovery.discover(Path.cwd()), args.json)
+
+
+def cmd_context(args):
+    root = Path.cwd()
+    if args.action == "bind":
+        data = context.bind(
+            root,
+            session_id=args.session,
+            task_id=args.task_id,
+            task_type=args.task_type,
+            spec_system=args.spec_system,
+            spec_ref=args.spec_ref,
+            parent_id=args.parent_id,
+            depends_on=args.depends_on,
+            required_evidence=args.require_evidence,
+        )
+    elif args.action == "show":
+        data = context.load(root, args.context_id) if args.context_id else context.active(root, args.session)
+        if data is None:
+            _die(mk_env("ERROR", "context_not_bound", "当前会话没有 active 上下文",
+                        "先运行 context bind"))
+    elif args.action == "list":
+        data = {"contexts": context.list_all(root)}
+    elif args.action == "approve":
+        data = context.approve(root, args.context_id, args.approval, actor=args.actor)
+    elif args.action == "complete":
+        data = context.complete(root, args.context_id)
+    else:  # argparse choices 已防守；保留显式分支避免静默
+        _die(mk_env("ERROR", "usage", f"未知 context action: {args.action}", "查看 context --help"))
+    _out(data, args.json)
+
+
+def cmd_evidence(args):
+    root = Path.cwd()
+    if args.action == "record":
+        data = evidence.record(
+            root, args.context_id, kind=args.kind, producer=args.producer,
+            result=args.result, summary=args.summary, source_ref=args.source_ref,
+            expires_on_change=args.expires_on_change,
+        )
+    elif args.action == "list":
+        data = {
+            "context_id": args.context_id,
+            "valid_kinds": sorted(evidence.valid_kinds(root, args.context_id)),
+            "evidence": evidence.list_all(root, args.context_id),
+        }
+    else:
+        _die(mk_env("ERROR", "usage", f"未知 evidence action: {args.action}", "查看 evidence --help"))
+    _out(data, args.json)
+
+
+def cmd_governance(args):
+    result = governance.evaluate(
+        Path.cwd(), args.action, session_id=args.session, path=args.path,
+    )
+    if result["allowed"]:
+        _out({
+            "allowed": True,
+            "action": args.action,
+            "context_id": (result.get("context") or {}).get("context_id"),
+        }, args.json)
+        return
+    _die(result["envelope"], code=2, as_json=args.json)
 
 
 def cmd_status(args):
@@ -322,6 +393,43 @@ def main(argv=None):
     sp = sub.add_parser("init", help="初始化 .flowguard/ 骨架（幂等）")
     sp.set_defaults(fn=cmd_init)
 
+    sp = sub.add_parser("discover", help="只读发现 Git / SDD / 工具状态，不执行初始化")
+    sp.set_defaults(fn=cmd_discover)
+
+    sp = sub.add_parser("context", help="治理上下文 bind|show|list|approve|complete")
+    sp.add_argument("action", choices=["bind", "show", "list", "approve", "complete"])
+    sp.add_argument("--session")
+    sp.add_argument("--task-id")
+    sp.add_argument("--task-type", choices=context.TASK_TYPES)
+    sp.add_argument("--spec-system", choices=context.SPEC_SYSTEMS)
+    sp.add_argument("--spec-ref")
+    sp.add_argument("--context-id")
+    sp.add_argument("--parent-id")
+    sp.add_argument("--depends-on", nargs="*", default=[])
+    sp.add_argument("--require-evidence", nargs="*", default=[])
+    sp.add_argument("--approval")
+    sp.add_argument("--actor")
+    sp.set_defaults(fn=cmd_context)
+
+    sp = sub.add_parser("evidence", help="证据 record|list（绑定当前代码指纹）")
+    sp.add_argument("action", choices=["record", "list"])
+    sp.add_argument("--context-id", required=True)
+    sp.add_argument("--kind", choices=evidence.KINDS)
+    sp.add_argument("--producer")
+    sp.add_argument("--result", choices=evidence.RESULTS)
+    sp.add_argument("--summary")
+    sp.add_argument("--source-ref")
+    expiry = sp.add_mutually_exclusive_group()
+    expiry.add_argument("--expires-on-change", dest="expires_on_change", action="store_true")
+    expiry.add_argument("--no-expire-on-change", dest="expires_on_change", action="store_false")
+    sp.set_defaults(fn=cmd_evidence, expires_on_change=None)
+
+    sp = sub.add_parser("governance", help="新治理动作检查（read/spec/test/code/commit/release）")
+    sp.add_argument("--session", required=True)
+    sp.add_argument("--action", required=True, choices=governance.ACTIONS)
+    sp.add_argument("--path")
+    sp.set_defaults(fn=cmd_governance)
+
     sp = sub.add_parser("status", help="流程看板")
     sp.add_argument("--feature")
     sp.set_defaults(fn=cmd_status)
@@ -366,8 +474,8 @@ def main(argv=None):
     sp.add_argument("--feature")
     sp.set_defaults(fn=cmd_instructions)
 
-    for name in ("init", "status", "feature", "next", "advance", "override",
-                 "gate", "validate", "instructions"):
+    for name in ("init", "discover", "context", "evidence", "governance", "status",
+                 "feature", "next", "advance", "override", "gate", "validate", "instructions"):
         sub.choices[name].add_argument("--json", action="store_true")
 
     args = p.parse_args(argv)
@@ -375,7 +483,7 @@ def main(argv=None):
     _AS_JSON = bool(getattr(args, "json", False))
     try:
         args.fn(args)
-    except state.StateError as e:
+    except (state.StateError, context.ContextError, evidence.EvidenceError) as e:
         _die(mk_env("ERROR", "state_error", str(e), "检查 .flowguard/ 状态或 journal"))
 
 

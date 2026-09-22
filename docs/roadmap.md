@@ -1,31 +1,46 @@
 # FlowGuard 技术路线图
 
-> Phase 1（v0.1.x）已完成：编排核 / 十阶段 DAG / 硬门禁 hooks / 11 技能 / vendor 机制 / e2e 验收。
-> 本文跟踪后续分期与开放问题；权威设计见 spec v3.1。
+> 当前规格：`docs/superpowers/specs/2026-09-23-flowguard-agent-driven-sdd-governance.md`。
+> 旧十阶段 Phase 1 已完成并进入兼容维护，不再作为功能扩张主线。
 
-## Phase 2 —— 审查与文档厚化（下一优先）
+## v0.2 —— 智能体驱动 SDD 治理
 
-| 项 | 内容 | 备注 |
-|---|---|---|
-| 代码审查厚化 | `flowguard-review` 嫁接五语言 *-code-review 的证据化发现项契约与打分维度 | 需先定「审查对象边界」（见开放问题） |
-| 文档生成厚化 | `flowguard-docs` 嫁接 full-stack-doc 文档体系 + api-doc-generator | 顺带决定 09-docs 是否细分 API/用户文档 |
-| journal 恢复工具 | 从 `journal/events.jsonl` 重建状态文件（灾难恢复） | Phase 1 只留痕不重建 |
-| 错误路径测试补强 | hooks 异常分支、并发锁多进程实测 | |
+| 能力 | 状态 | 证据 |
+|:---|:---|:---|
+| Git / SDD 只读发现 | ✅ | `discovery.py` + 无体系/单体系/冲突测试 |
+| session + worktree + task 绑定 | ✅ | `context.py` + 双会话隔离测试 |
+| 父子任务与 depends_on | ✅ | 父任务完成阻断测试 |
+| 指纹化证据与 stale | ✅ | `evidence.py` + 代码变化测试 |
+| 六类动作门禁 | ✅ | `governance.py` + commit 证据矩阵 |
+| 五类 Hooks | ✅ | 子进程协议测试 |
+| 主技能改为智能体循环 | ✅ | 生成 parity 测试 |
+| 旧十阶段兼容 | ✅ | 原有回归测试 |
 
-## Phase 3 —— 架构/交付厚化 + 全量按栈路由
+## v0.3 —— 原生工具状态适配
 
-| 项 | 内容 |
-|---|---|
-| 架构设计厚化 | `flowguard-architecture` 嫁接 ddd-architecture-selector 选型决策矩阵 |
-| 部署交付厚化 | `flowguard-release` 嫁接 easy4j-deploy / fw-release-gate 发布证据链 |
-| 发布范围（版本列车） | 功能 → 版本/里程碑归属，替代「全部功能收敛」的粗粒度解锁 |
-| 按栈路由全量 | 各阶段执行技能的完整栈路由表 |
-| `flowguard export --openspec` | 功能需求机械导出为 OpenSpec change（格式已兼容） |
+- Spec Kit：读取 constitution、feature、plan、tasks 的真实阶段和一致性结果。
+- OpenSpec：读取 change 状态、proposal/spec/design/tasks、verify/sync/archive 结果。
+- Superpowers：识别正式规格、计划与必要执行技能，不创建冲突任务表。
+- 提供只读 `adapter doctor`，区分 CLI、Skills、项目初始化和当前变更状态。
 
-## 开放问题（不阻塞迭代）
+## v0.4 —— 可信回执与三插件协同
 
-1. **审查对象边界**（P0 级设计缺口）：08-review 的 diff 范围按功能分支 / journal 写码记录 / 用户圈定文件？Phase 2 前必须定。
-2. **发布范围**：功能→版本归属（随 Phase 3）。
-3. **功能间依赖**（dependsOn/provides）：Phase 2 视真实项目痛点再定。
-4. 功能级文档粒度：09-docs 一份清单 vs 细分。
-5. Tier 1 vendor 恢复：给 design/ddd/python/java/rust-skills 五上游仓打不可变 tag → 回填 skills.lock.json → `skill_vendor update`（执行技能由「安装命令引用」升级为「离线快照」）。
+- 定义 CodeGuard / CodeReview / CI 通用 evidence envelope 与签名 receipt。
+- FlowGuard 只消费检查报告，不调用检查实现。
+- 建立 `git commit` 前统一裁决：流程归属 → 确定性检查 → 语义审查 → 用户策略。
+- 加入证据生产者版本、配置摘要和覆盖范围，减少“错误 PASS”。
+
+## v0.5 —— 风险策略与迁移
+
+- 仓库级风险策略：公共 API、数据库、权限、安全、发布动作的差异化门槛。
+- 可选/必要子任务和父级集成验收。
+- 旧十阶段到原生 SDD 的可逆迁移器；迁移前不移除旧命令和产物。
+- 四宿主真实安装/加载/回执矩阵和性能预算。
+
+## 开放问题
+
+1. 宿主如何提供不可由 Agent 伪造的用户确认 receipt？
+2. CodeReview 插件的报告 Schema、模型置信度和失败策略如何定义？
+3. 大型 monorepo 的代码指纹应按上下文文件集还是整个 worktree 计算？
+4. incident 恢复后补规格的最大时间窗口和发布限制如何配置？
+5. 旧十阶段兼容层何时满足移除条件？

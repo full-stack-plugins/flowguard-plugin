@@ -1,0 +1,5 @@
+{
+  "name": "flowguard-context",
+  "description": "绑定会话 + worktree + 任务上下文，并管理父子任务、依赖与用户批准",
+  "prompt": "管理 FlowGuard 治理上下文。先运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" discover --json`，再根据真实任务选择：\n\n- 绑定：`... flowguard_state.py context bind --session <session> --task-id <id> --task-type <read_only|simple_change|important_change|incident> --spec-system <none|spec-kit|openspec|superpowers|external> [--spec-ref <path-or-url>] [--parent-id <id>] [--depends-on <ids...>] --json`\n- 查看：`... flowguard_state.py context show --session <session> --json`\n- 列表：`... flowguard_state.py context list --json`\n- 批准：仅在用户明确确认对应事项后运行 `... flowguard_state.py context approve --context-id <id> --approval scope_approved --actor user --json`\n- 完成：`... flowguard_state.py context complete --context-id <id> --json`；依赖或必要子任务未完成会拒绝\n\n不得复制原生规格正文到 `.flowguard/contexts`，不得替用户编造批准。"
+}

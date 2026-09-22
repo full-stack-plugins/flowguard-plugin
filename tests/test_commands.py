@@ -4,11 +4,14 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 CMD = ROOT / "commands"
 CLI_SRC = (ROOT / "scripts" / "flowguard_state.py").read_text(encoding="utf-8")
 
-EXPECTED = {"flowguard-init", "flowguard-feature", "flowguard-status", "flowguard-next",
-            "flowguard-advance", "flowguard-gate", "flowguard-override"}
+EXPECTED = {
+    "flowguard-discover", "flowguard-context", "flowguard-evidence", "flowguard-governance",
+    "flowguard-init", "flowguard-feature", "flowguard-status", "flowguard-next",
+    "flowguard-advance", "flowguard-gate", "flowguard-override",
+}
 
 class CommandsTest(unittest.TestCase):
-    def test_all_seven_exist_with_schema(self):
+    def test_all_commands_exist_with_schema(self):
         files = {p.stem for p in CMD.glob("flowguard-*.json")}
         self.assertEqual(files, EXPECTED)
         for p in CMD.glob("flowguard-*.json"):

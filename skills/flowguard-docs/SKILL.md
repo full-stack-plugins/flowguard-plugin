@@ -1,11 +1,13 @@
 ---
 name: flowguard-docs
 license: Apache-2.0
-description: 文档生成阶段（薄）。当用户要为功能补 API/用户/运维文档并记录生成情况时使用。不要用它写发布清单（flowguard-release）。
-compatibility: 需要项目内已运行 /flowguard-init 且存在 current_feature（项目级阶段除外）；阶段推进经由编排核 CLI。
+description: 兼容模式，仅当项目已有旧 .flowguard 十阶段状态或用户明确要求旧流程时使用。文档生成阶段（薄）。当用户要为功能补 API/用户/运维文档并记录生成情况时使用。不要用它写发布清单（flowguard-release）。
+compatibility: 旧十阶段兼容层；需要项目已有 .flowguard/project.json，阶段推进经由编排核 CLI。
 ---
 
 # flowguard-docs —— 产出功能文档清单与生成记录 09-docs.md。
+
+> **兼容模式**：仅当项目已有旧 `.flowguard` 十阶段状态，或用户明确要求继续旧流程时使用。新任务先交给 `flowguard` 主技能发现并绑定原生 SDD 事实源。
 
 功能级阶段：以 current_feature 为工作对象。
 

@@ -1,11 +1,13 @@
 ---
 name: flowguard-solution
 license: Apache-2.0
-description: 技术方案阶段。当用户为某功能定实现方案、接口契约或风险预案时使用。不要用它做全项目架构决策（flowguard-architecture）。
-compatibility: 需要项目内已运行 /flowguard-init 且存在 current_feature（项目级阶段除外）；阶段推进经由编排核 CLI。
+description: 兼容模式，仅当项目已有旧 .flowguard 十阶段状态或用户明确要求旧流程时使用。技术方案阶段。当用户为某功能定实现方案、接口契约或风险预案时使用。不要用它做全项目架构决策（flowguard-architecture）。
+compatibility: 旧十阶段兼容层；需要项目已有 .flowguard/project.json，阶段推进经由编排核 CLI。
 ---
 
 # flowguard-solution —— 产出功能技术方案 03-solution.md：实现选型 / 接口契约 / 风险清单。
+
+> **兼容模式**：仅当项目已有旧 `.flowguard` 十阶段状态，或用户明确要求继续旧流程时使用。新任务先交给 `flowguard` 主技能发现并绑定原生 SDD 事实源。
 
 功能级阶段：以 current_feature 为工作对象。
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SessionStart：注入流程状态摘要（未初始化则静默）。协议见 hooks/__protocol__.md。"""
+"""SessionStart：只读发现 SDD 状态并恢复治理上下文。"""
 import json
 import os
 import sys
@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from flowguard_lib import state  # noqa: E402
+from flowguard_lib import context, discovery, state  # noqa: E402
 
 FEATURE_STAGES = ("requirements", "solution", "testcases", "hld", "lld", "review", "docs")
 
@@ -19,21 +19,51 @@ def main():
     except Exception:
         payload = {}
     cwd = Path(payload.get("cwd") or os.getcwd())
+    session_id = payload.get("session_id") or payload.get("conversation_id") or "default"
+    snapshot = discovery.discover(cwd)
+    lines = []
+    if snapshot["git"]["is_repository"]:
+        sdd = snapshot["sdd"]
+        lines.extend([
+            "[flowguard] SDD 检测:",
+            f"[flowguard] 项目类型={snapshot['project_type']} | 状态={sdd['status']}",
+            f"[flowguard] 检测体系={', '.join(k for k, v in sdd['markers'].items() if v) or '无'}",
+            f"[flowguard] 规格事实源={sdd['selected_system'] or '待智能体判断'}",
+        ])
+        if sdd["status"] == "choice_required":
+            lines.append("[flowguard] 必须事项: Spec Kit 与 OpenSpec 冲突，写码前请用户选择本次变更事实源")
+        elif sdd["status"] == "assessment_required":
+            lines.append("[flowguard] 必须事项: 智能体需分类任务；重要变更须提出 SDD 选择并在初始化前取得批准")
+        try:
+            active = context.active(cwd, session_id)
+        except Exception as error:
+            active = None
+            lines.append(f"[flowguard] WARNING: 上下文恢复失败，按未绑定处理: {error}")
+        if active:
+            lines.append(
+                f"[flowguard] 当前上下文={active['task_id']}({active['task_type']}) "
+                f"| source={active['spec_system']}:{active.get('spec_ref') or '-'}"
+            )
+        else:
+            lines.append("[flowguard] 当前上下文=未绑定 | 下一步: flowguard_state.py context bind ...")
     try:
         project = state.load_project(cwd)
     except Exception:
-        return 0  # 未初始化：静默
-    lines = [f"[flowguard] 项目 {project['project']} | current_feature: {project.get('current_feature') or '未设定'}"]
-    lines.append("[flowguard] 项目级阶段: " + ", ".join(
-        f"{s}={project['stages'][s]['status']}" for s in ("architecture", "standards", "release")))
-    for fid in (project.get("features") or {}):
-        try:
-            f = state.load_feature(cwd, fid)
-        except Exception:
-            continue
-        sts = " ".join(f"{s[0]}={f['stages'][s]['status']}" for s in FEATURE_STAGES)
-        lines.append(f"[flowguard] 功能 {fid}({f.get('status')}): {sts}")
-    print("\n".join(lines))
+        project = None
+    if project:
+        lines.append(
+            f"[flowguard] 兼容状态: 项目 {project['project']} | "
+            f"legacy current_feature={project.get('current_feature') or '未设定'}"
+        )
+        for fid in (project.get("features") or {}):
+            try:
+                f = state.load_feature(cwd, fid)
+            except Exception:
+                continue
+            sts = " ".join(f"{s[0]}={f['stages'][s]['status']}" for s in FEATURE_STAGES)
+            lines.append(f"[flowguard] 兼容功能 {fid}({f.get('status')}): {sts}")
+    if lines:
+        print("\n".join(lines))
     return 0
 
 

@@ -1,11 +1,13 @@
 ---
 name: flowguard-standards
 license: Apache-2.0
-description: 编码规范阶段（项目级，厚）。当用户要定编码规范、按栈选规范来源、或增补项目规约时使用；规范集生成后，写码门禁才解锁。不要用它执行 lint（那是 codeguard-plugin）。
-compatibility: 需要项目内已运行 /flowguard-init 且存在 current_feature（项目级阶段除外）；阶段推进经由编排核 CLI。
+description: 兼容模式，仅当项目已有旧 .flowguard 十阶段状态或用户明确要求旧流程时使用。编码规范阶段（项目级，厚）。当用户要定编码规范、按栈选规范来源、或增补项目规约时使用；规范集生成后，写码门禁才解锁。不要用它执行 lint（那是 codeguard-plugin）。
+compatibility: 旧十阶段兼容层；需要项目已有 .flowguard/project.json，阶段推进经由编排核 CLI。
 ---
 
 # flowguard-standards —— 产出项目编码规范集 07-standards.md：按模块栈路由规范来源，追加式增补。
+
+> **兼容模式**：仅当项目已有旧 `.flowguard` 十阶段状态，或用户明确要求继续旧流程时使用。新任务先交给 `flowguard` 主技能发现并绑定原生 SDD 事实源。
 
 项目级阶段：全项目走一次。
 

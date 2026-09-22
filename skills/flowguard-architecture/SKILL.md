@@ -1,11 +1,13 @@
 ---
 name: flowguard-architecture
 license: Apache-2.0
-description: 架构设计阶段（项目级，走一次）。当用户要定技术选型、写 ADR、划模块边界时使用；ADR 一律追加式并标注来源功能，禁止改写既有条目。不要用它写单个功能的技术方案（那是 flowguard-solution）。
-compatibility: 需要项目内已运行 /flowguard-init 且存在 current_feature（项目级阶段除外）；阶段推进经由编排核 CLI。
+description: 兼容模式，仅当项目已有旧 .flowguard 十阶段状态或用户明确要求旧流程时使用。架构设计阶段（项目级，走一次）。当用户要定技术选型、写 ADR、划模块边界时使用；ADR 一律追加式并标注来源功能，禁止改写既有条目。不要用它写单个功能的技术方案（那是 flowguard-solution）。
+compatibility: 旧十阶段兼容层；需要项目已有 .flowguard/project.json，阶段推进经由编排核 CLI。
 ---
 
 # flowguard-architecture —— 产出项目架构产物 02-architecture.md：选型 / ADR 追加式列表 / 模块边界。
+
+> **兼容模式**：仅当项目已有旧 `.flowguard` 十阶段状态，或用户明确要求继续旧流程时使用。新任务先交给 `flowguard` 主技能发现并绑定原生 SDD 事实源。
 
 项目级阶段：全项目走一次。
 

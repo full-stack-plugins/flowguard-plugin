@@ -1,0 +1,5 @@
+{
+  "name": "flowguard-discover",
+  "description": "只读发现目标 Git 项目、原生 SDD 体系、CLI 可用性与冲突，不初始化任何工具",
+  "prompt": "执行 FlowGuard 的只读 SDD 发现：\n\n1. 确认用户指定的真实仓库或模块路径，运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" discover --json`\n2. 报告 Git/worktree、项目类型、`.specify/`、`openspec/`、Superpowers 产物、CLI 可用性和旧 FlowGuard 状态\n3. 明确区分：CLI 已安装、Skill 已安装、项目已初始化\n4. 若状态为 `choice_required`，停止创建规格并请求用户选择事实源\n5. 若状态为 `assessment_required`，由智能体结合用户任务分类 read_only/simple_change/important_change/incident；不要静默初始化\n\n本命令严格只读，不运行 specify init、openspec init、安装或迁移。"
+}
