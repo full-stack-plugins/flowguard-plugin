@@ -1,0 +1,5 @@
+{
+  "name": "flowgate-advance",
+  "description": "阶段验收入口（accepted 的唯一写入点）：必须由用户明确确认后才执行",
+  "prompt": "这是流程门禁的验收环节，**必须 human-in-the-loop**：\n\n1. 运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowgate_state.py\" validate --json`（默认当前功能）——存在 ERROR 时先修复，禁止带病验收\n2. 向用户展示待验收阶段（当前 in_progress 阶段）的产物摘要：\n   - 需求：用户故事数、REQ-ID 清单、验收标准要点\n   - 测试用例：用例数、REQ 覆盖率、测试文件清单\n   - 其它阶段：产物核心结论\n3. **必须等待用户明确说「验收通过/确认」后**，才运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowgate_state.py\" advance --evidence <证据要点...> [--stage <阶段>] [--feature <id>] --json`\n4. 用户未确认时，一律不得运行 advance；用户说「跳过」时改走 /flowgate-override（留痕）\n5. 验收成功后运行 `... status --json` 报告流程推进结果与下一步\n\n硬门禁语义：accepted 只能由用户确认写入，agent 永远不能代替用户验收。"
+}
