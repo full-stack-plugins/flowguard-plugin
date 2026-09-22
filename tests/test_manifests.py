@@ -10,7 +10,8 @@ class ManifestContractTest(unittest.TestCase):
         m = self._load(".zcode-plugin/plugin.json")
         self.assertEqual(m["name"], "flowgate")
         self.assertEqual(m["displayName"], "研发流程门禁")
-        self.assertEqual(m["displayName_i18n"]["en"], "FlowGate: R&D Process Gate")
+        # sync-plugin-configs 以 catalog 为单源规范 i18n（en 与 displayName 同值）
+        self.assertEqual(m["displayName_i18n"]["en"], "研发流程门禁")
         self.assertEqual(m["version"], "0.1.0")
         self.assertEqual(m["license"], "Apache-2.0")
         self.assertNotIn("hooks", m, "ZCode manifest 不得写 hooks 键（约定发现）")
