@@ -1,10 +1,15 @@
 """状态锁与原子写工具；项目流程事实保存在 docs/（十阶段文档为唯一事实源）。"""
 import contextlib
-import fcntl
 import os
 import pathlib
 import stat
 import tempfile
+
+try:
+    import fcntl
+except ImportError:  # Windows：改用 msvcrt 字节锁，语义同为进程退出自动释放
+    fcntl = None
+    import msvcrt
 
 
 class StateError(Exception):
@@ -17,9 +22,12 @@ def state_lock(root):
     from .runtime import repository_state_dir
     lock = repository_state_dir(root, create=True) / ".lock"
     lock.parent.mkdir(parents=True, exist_ok=True)
-    fh = lock.open("w")
+    fh = lock.open("w+")
     try:
-        fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        if fcntl is not None:
+            fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        else:  # pragma: no cover - Windows
+            msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
     except OSError:
         fh.close()
         raise StateError("状态文件被其它进程锁定，请稍后重试")

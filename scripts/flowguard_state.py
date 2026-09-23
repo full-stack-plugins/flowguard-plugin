@@ -11,7 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from flowguard_lib import (  # noqa: E402
-    context, discovery, evidence, governance, registry,
+    context, detect, discovery, evidence, governance, registry,
     stage_docs, state, validation,
 )
 from flowguard_lib.diag import emit as emit_diag, envelope as mk_env  # noqa: E402
@@ -147,6 +147,14 @@ def cmd_validate(args):
             _die(mk_env("ERROR", "unknown_task", f"功能文档不存在: {args.task_id}",
                         "先用 context bind 创建 docs/features/<task-id>/"), as_json=args.json)
     issues = []
+    issues += validation.validate_architecture(
+        _read(stage_docs.path_for(root, "project", "02-architecture")))
+    issues += validation.validate_standards(
+        _read(stage_docs.path_for(root, "project", "07-standards")),
+        detect.detect(root)["modules"])
+    issues += validation.validate_release(
+        _read(stage_docs.path_for(root, "project", "10-release")),
+        validation.known_task_ids(root))
     for task in tasks:
         task_id = task["task_id"]
         if task.get("error"):

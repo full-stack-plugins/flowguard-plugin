@@ -4,13 +4,27 @@ import hashlib
 import re
 from pathlib import Path
 
-from . import ids, registry, state, validation
+from . import detect, ids, registry, state, validation
 
 VALID_STATUSES = (
     "pending", "in_progress", "pending_acceptance", "accepted",
     "inherited", "skipped", "invalidated",
 )
 SATISFIED = ("accepted", "inherited", "skipped")
+
+# 合法状态迁移表（单一事实源；测试做全矩阵断言）。
+# invalidated 是指纹派生态：正文/前置变化后由 read() 推导，不可直接写入。
+# 满足态之间禁止互跳与重复写：回改须显式退回 in_progress，重新走验收；
+# 仅 invalidated（正文已变）可直接重新验收。
+LEGAL = {
+    "pending": ("in_progress", "accepted", "inherited", "skipped"),
+    "in_progress": ("pending_acceptance", "accepted", "inherited", "skipped"),
+    "pending_acceptance": ("in_progress", "accepted", "inherited", "skipped"),
+    "invalidated": ("in_progress", "accepted", "inherited", "skipped"),
+    "accepted": ("in_progress",),
+    "inherited": ("in_progress",),
+    "skipped": ("in_progress",),
+}
 FIELDS = ("任务", "父任务", "阶段", "阶段状态", "规格事实源", "原生产物", "批准依据")
 _ROW = re.compile(r"^\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*$", re.MULTILINE)
 
@@ -275,6 +289,11 @@ def _advance_unlocked(root, task_id, stage, target, *, approval_ref=None, reason
     current = read(root, task_id, stage)
     if current["missing"]:
         raise StageDocError(f"阶段文档不存在: {path}")
+    allowed = LEGAL.get(current["status"], ())
+    if target not in allowed:
+        raise StageDocError(
+            f"非法状态迁移 {current['status']} → {target}"
+            f"（合法目标: {', '.join(allowed) or '无'}）")
     if target in SATISFIED and not approval_ref:
         raise StageDocError("验收、继承或跳过必须提供批准依据；理由文本不能代替批准")
     if target in ("inherited", "skipped") and not reason:
@@ -295,6 +314,12 @@ def _advance_unlocked(root, task_id, stage, target, *, approval_ref=None, reason
             issues = validation.validate_testcases(body, req_ids, root)
         elif stage == "08-review":
             issues = validation.validate_review(body)
+        elif stage == "02-architecture":
+            issues = validation.validate_architecture(body)
+        elif stage == "07-standards":
+            issues = validation.validate_standards(body, detect.detect(root)["modules"])
+        elif stage == "10-release":
+            issues = validation.validate_release(body, validation.known_task_ids(root))
         else:
             issues = []
         blocking = [item["message"] for item in issues if item["level"] in ("ERROR", "WARNING")]

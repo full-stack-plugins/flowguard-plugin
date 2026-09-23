@@ -184,7 +184,7 @@ class DocsPipelineTest(unittest.TestCase):
         (self.root / "tests").mkdir()
         (self.root / "tests/test_refund.py").write_text("def test_refund():\n    assert True\n", encoding="utf-8")
         for path in (self.root / "docs").rglob("*.md"):
-            text = re.sub(r"\{\{[^}\n]+\}\}", "已确认", path.read_text(encoding="utf-8"))
+            text = re.sub(r"\{\{[^}\n]+\}\}", "已确认", path.read_text(encoding="utf-8")).replace("状态: 已确认", "状态: accepted")
             text = text.replace("测试文件: 已确认", "测试文件: tests/test_refund.py")
             text = text.replace("- 结论: fix|wontfix|deferred", "- 结论: fix")
             path.write_text(text, encoding="utf-8")
@@ -219,7 +219,7 @@ class DocsPipelineTest(unittest.TestCase):
             encoding="utf-8",
         )
         for path in (self.root / "docs").rglob("*.md"):
-            text = re.sub(r"\{\{[^}\n]+\}\}", "已确认", path.read_text(encoding="utf-8"))
+            text = re.sub(r"\{\{[^}\n]+\}\}", "已确认", path.read_text(encoding="utf-8")).replace("状态: 已确认", "状态: accepted")
             text = text.replace("测试文件: 已确认", "测试文件: tests/test_refund.py")
             text = text.replace("- 结论: fix|wontfix|deferred", "- 结论: fix")
             path.write_text(text, encoding="utf-8")
@@ -248,7 +248,7 @@ class DocsPipelineTest(unittest.TestCase):
             encoding="utf-8",
         )
         for path in (self.root / "docs").rglob("*.md"):
-            text = re.sub(r"\{\{[^}\n]+\}\}", "已确认", path.read_text(encoding="utf-8"))
+            text = re.sub(r"\{\{[^}\n]+\}\}", "已确认", path.read_text(encoding="utf-8")).replace("状态: 已确认", "状态: accepted")
             text = text.replace("测试文件: 已确认", "测试文件: tests/test_refund.py")
             text = text.replace("- 结论: fix|wontfix|deferred", "- 结论: fix")
             path.write_text(text, encoding="utf-8")
@@ -454,7 +454,7 @@ class DocsPipelineTest(unittest.TestCase):
         self.bind()
         from flowguard_lib import stage_docs
         path = self.root / "docs/features/refund/01-requirements.md"
-        text = re.sub(r"\{\{[^}\n]+\}\}", "已确认", path.read_text(encoding="utf-8"))
+        text = re.sub(r"\{\{[^}\n]+\}\}", "已确认", path.read_text(encoding="utf-8")).replace("状态: 已确认", "状态: accepted")
         path.write_text(text, encoding="utf-8")
         stage_docs.advance(self.root, "refund", "01-requirements", "accepted", approval_ref="user-receipt:1")
 
@@ -466,7 +466,7 @@ class DocsPipelineTest(unittest.TestCase):
         from flowguard_lib import stage_docs
         for stage in ("01-requirements", "02-architecture", "03-solution"):
             path = stage_docs.path_for(self.root, "refund", stage)
-            path.write_text(re.sub(r"\{\{[^}\n]+\}\}", "已确认", path.read_text(encoding="utf-8")),
+            path.write_text(re.sub(r"\{\{[^}\n]+\}\}", "已确认", path.read_text(encoding="utf-8")).replace("状态: 已确认", "状态: accepted"),
                             encoding="utf-8")
             stage_docs.advance(self.root, "refund", stage, "accepted", approval_ref=f"user:{stage}")
         requirement = stage_docs.path_for(self.root, "refund", "01-requirements")

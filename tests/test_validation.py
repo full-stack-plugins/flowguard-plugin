@@ -100,5 +100,52 @@ class Tier2Test(unittest.TestCase):
         refs = [("local-skill", "p", "cmd")]
         self.assertEqual(validation.missing_tier2(refs, root=root), [])
 
+
+class ProjectDocValidationTest(unittest.TestCase):
+    def test_architecture_template_and_valid_adr_pass(self):
+        self.assertEqual(validation.validate_architecture(
+            "- ADR-{{编号}} | feature: {{来源}} | 状态: {{proposed/accepted}} —— {{决策}}"), [])
+        self.assertEqual(validation.validate_architecture(
+            "- ADR-0001 | feature: refund | 状态: accepted —— 采用追加式 ADR"), [])
+
+    def test_architecture_adr_missing_feature_or_status_is_error(self):
+        issues = validation.validate_architecture(
+            "- ADR-0002 | 状态: accepted —— 缺来源\n- ADR-0003 | feature: refund | 状态: draft —— 非法状态")
+        self.assertEqual([i["level"] for i in issues], ["ERROR", "ERROR"])
+        self.assertTrue(any("feature" in i["message"] for i in issues))
+        self.assertTrue(any("状态" in i["message"] for i in issues))
+
+    def test_standards_template_vacuous_and_coverage(self):
+        self.assertEqual(validation.validate_standards(
+            "## 2. 规范集\n\n### 2.1 {{模块 / 栈名}}\n- {{条目}}\n\n## 3. 增补\n",
+            {"order": {"stack": "java-spring"}}), [])
+        covered = "## 2. 规范集 (Standards)\n\n### 2.1 order / java-spring\n- 规约条目\n\n## 3. 增补\n"
+        self.assertEqual(validation.validate_standards(covered,
+                                                       {"order": {"stack": "java-spring"}}), [])
+        issues = validation.validate_standards(covered,
+                                               {"order": {"stack": "java-spring"},
+                                                "web": {"stack": "vue3"}})
+        self.assertEqual([i["level"] for i in issues], ["ERROR"])
+        self.assertIn("web", issues[0]["message"])
+        # 无栈模块（无法判定技术栈）跳过
+        self.assertEqual(validation.validate_standards(covered, {"app": {"stack": None}}), [])
+
+    def test_release_template_vacuous_and_unknown_feature(self):
+        self.assertEqual(validation.validate_release(
+            "## 3. 发布内容\n\n| {{feature-id}} | {{✅ 已实现}} | {{...}} |\n\n## 4. 校验\n",
+            ["refund"]), [])
+        body = ("## 3. 发布内容 (Scope)\n\n"
+                "| 功能 (feature) | 状态 | 说明 |\n| :--- | :--- | :--- |\n"
+                "| refund | ✅ | ok |\n| ghost | ✅ | 幽灵 |\n\n## 4. 校验\n")
+        issues = validation.validate_release(body, ["refund"])
+        self.assertEqual([i["level"] for i in issues], ["ERROR"])
+        self.assertIn("ghost", issues[0]["message"])
+
+    def test_known_task_ids(self):
+        root = Path(tempfile.mkdtemp())
+        (root / "docs" / "features" / "refund").mkdir(parents=True)
+        (root / "docs" / "features" / "Bad_ID").mkdir(parents=True)
+        self.assertEqual(validation.known_task_ids(root), ["refund"])
+
 if __name__ == "__main__":
     unittest.main()
