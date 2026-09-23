@@ -89,10 +89,10 @@ class GovernanceCliTest(unittest.TestCase):
         self.assertEqual(json.loads(started.stdout)["status"], "in_progress")
         self.assertFalse((self.root / ".flowguard").exists())
 
-    def test_legacy_init_cannot_create_private_directory_in_new_project(self):
+    def test_legacy_commands_are_gone_and_never_create_private_directory(self):
         result = run(self.root, "legacy-init", "--json")
         self.assertEqual(result.returncode, 3)
-        self.assertEqual(json.loads(result.stdout)["code"], "legacy_state_required")
+        self.assertEqual(json.loads(result.stdout)["code"], "usage")
         self.assertFalse((self.root / ".flowguard").exists())
 
     def test_init_creates_only_project_stage_documents(self):

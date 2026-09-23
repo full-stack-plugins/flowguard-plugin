@@ -2,7 +2,7 @@
 name: flowguard-docs
 license: Apache-2.0
 description: 文档生成阶段（薄）。当用户要为功能补 API/用户/运维文档并记录生成情况时使用。不要用它写发布清单（flowguard-release）。
-compatibility: Python 3 标准库；十阶段文档位于 docs/，无需项目 .flowguard/ 目录。
+compatibility: Python 3 标准库；十阶段文档位于 docs/。
 ---
 
 # flowguard-docs —— 产出功能文档清单与生成记录 09-docs.md。

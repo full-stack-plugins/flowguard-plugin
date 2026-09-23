@@ -1,5 +1,5 @@
 {
   "name": "flowguard-init",
-  "description": "只创建 docs/project/ 中的项目级十阶段文档；不创建 .flowguard/",
-  "prompt": "先运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" discover --json` 做只读检查。若用户已要求初始化 FlowGuard 文档且目标仓库明确，运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" init --json`。只创建 docs/project/ 下的 02/07/10；功能文档由 context bind 创建。不得自动执行 specify init、openspec init 或 legacy-init。"
+  "description": "只创建 docs/project/ 中的项目级十阶段文档",
+  "prompt": "先运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" discover --json` 做只读检查。若用户已要求初始化 FlowGuard 文档且目标仓库明确，运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" init --json`。只创建 docs/project/ 下的 02/07/10；功能文档由 context bind 创建。不得自动执行 specify init 或 openspec init。"
 }

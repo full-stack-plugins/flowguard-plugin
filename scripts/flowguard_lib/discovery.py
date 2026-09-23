@@ -100,7 +100,6 @@ def discover(start):
             "markers": markers,
             "artifacts": sorted(set(artifacts)),
             "conflicts": conflicts,
-            "legacy_flowguard": (root / ".flowguard" / "project.json").is_file(),
         },
         "tools": {
             "specify_cli": bool(shutil.which("specify")),

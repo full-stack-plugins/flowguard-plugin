@@ -2,7 +2,7 @@
 name: flowguard-solution
 license: Apache-2.0
 description: 技术方案阶段。当用户为某功能定实现方案、接口契约或风险预案时使用。不要用它做全项目架构决策（flowguard-architecture）。
-compatibility: Python 3 标准库；十阶段文档位于 docs/，无需项目 .flowguard/ 目录。
+compatibility: Python 3 标准库；十阶段文档位于 docs/。
 ---
 
 # flowguard-solution —— 产出功能技术方案 03-solution.md：实现选型 / 接口契约 / 风险清单。

@@ -2,7 +2,7 @@
 name: flowguard-standards
 license: Apache-2.0
 description: 编码规范阶段（项目级，厚）。当用户要定编码规范、按栈选规范来源、或增补项目规约时使用；规范集生成后，写码门禁才解锁。不要用它执行 lint（那是 codeguard-plugin）。
-compatibility: Python 3 标准库；十阶段文档位于 docs/，无需项目 .flowguard/ 目录。
+compatibility: Python 3 标准库；十阶段文档位于 docs/。
 ---
 
 # flowguard-standards —— 产出项目编码规范集 07-standards.md：按模块栈路由规范来源，追加式增补。

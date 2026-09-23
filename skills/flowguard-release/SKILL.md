@@ -2,7 +2,7 @@
 name: flowguard-release
 license: Apache-2.0
 description: 部署交付阶段（项目级收口）。当所有功能 done 后做交付收口、写发布清单时使用。不要在还有 active 功能时尝试发布（门禁会阻断）。
-compatibility: Python 3 标准库；十阶段文档位于 docs/，无需项目 .flowguard/ 目录。
+compatibility: Python 3 标准库；十阶段文档位于 docs/。
 ---
 
 # flowguard-release —— 产出发布清单 10-release.md：列出本次交付功能及各自 09 文档状态，登记版本/校验和/回滚方案/证据；列入功能的文档变化后重新验收发布阶段。

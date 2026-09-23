@@ -85,7 +85,7 @@ def code_fingerprint(root, ctx):
         digest.update(head.stdout.strip().encode("utf-8"))
         diff = _git(root, "diff", "--binary", "HEAD", "--", ".",
                     ":(exclude)docs/features", ":(exclude)docs/project",
-                    ":(exclude)docs/legacy-flowguard", ":(exclude).flowguard",
+                    ":(exclude)docs/legacy-flowguard",
                     ":(exclude).specify", ":(exclude)openspec",
                     ":(exclude)docs/superpowers")
         if diff.returncode:
@@ -96,7 +96,7 @@ def code_fingerprint(root, ctx):
             raise GitStateError("无法读取 Git 未跟踪文件")
         for raw in sorted(item for item in others.stdout.split(b"\0") if item):
             rel = raw.decode("utf-8", errors="surrogateescape")
-            if rel.startswith(("docs/features/", "docs/project/", "docs/legacy-flowguard/", ".flowguard/", *NATIVE_SPEC_DIRS)):
+            if rel.startswith(("docs/features/", "docs/project/", "docs/legacy-flowguard/", *NATIVE_SPEC_DIRS)):
                 continue
             digest.update(raw)
             path = root / rel
@@ -110,7 +110,7 @@ def code_fingerprint(root, ctx):
             raise GitStateError("无法读取初始 Git 工作树文件")
         for raw in sorted(set(item for item in files.stdout.split(b"\0") if item)):
             rel = raw.decode("utf-8", errors="surrogateescape")
-            if rel.startswith(("docs/features/", "docs/project/", "docs/legacy-flowguard/", ".flowguard/", *NATIVE_SPEC_DIRS)):
+            if rel.startswith(("docs/features/", "docs/project/", "docs/legacy-flowguard/", *NATIVE_SPEC_DIRS)):
                 continue
             digest.update(raw)
             path = root / rel

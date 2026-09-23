@@ -29,8 +29,8 @@
 |:---|:---|:---|:---|:---:|
 | `flowguard_status_summary.py` | SessionStart | 只读发现 SDD、恢复上下文、提示冲突/待分类 | stdout 摘要 | 0 |
 | `flowguard_prompt_guard.py` | UserPromptSubmit | 提醒智能体重新判断任务、范围与事实源 | stdout 提醒 | 0 |
-| `flowguard_gate.py` | PreToolUse | 校验业务写入、Git commit、发布；保护治理状态 | stderr 诊断 | 0 / 2 |
-| `flowguard_artifact_check.py` | PostToolUse | 观察 `docs/` 阶段文档是否失效；在有明确 exit_code 时记录检查结果；兼容旧产物降级 | stdout JSON `systemMessage`；stderr 兼容提示 | 0 |
+| `flowguard_gate.py` | PreToolUse | 校验业务写入、Git commit、发布；拒绝越出 worktree 的写入 | stderr 诊断 | 0 / 2 |
+| `flowguard_artifact_check.py` | PostToolUse | 观察 `docs/` 阶段文档是否失效；在有明确 exit_code 时记录检查结果 | stdout JSON `systemMessage`；stderr 兼容提示 | 0 |
 | `flowguard_artifact_check.py` | Kimi PostToolUseFailure（Shell） | 明确的测试工具失败记 FAIL，覆盖同一指纹的旧 PASS；不把错误文本当成功摘要 | stdout JSON `systemMessage` | 0 |
 | `flowguard_stage_summary.py` | Stop | 汇总上下文、缺失提交证据和下一步 | stdout JSON `systemMessage` | 0 |
 
@@ -54,9 +54,9 @@
 | `mcp__codeguard__list_languages`、`mcp__codeguard__analyze_java_impact` | 已核对为只读，放行；仅匹配 MCP 服务器名为 `codeguard` 的精确工具名 |
 | `mcp__codeguard__check_code_style` | `test_write`；必须显式传入属于当前 Git worktree 的 `path`；仅在 PostToolUse 逐语言结构化检查全部 PASS 时登记静态分析 PASS |
 | `mcp__codeguard__auto_fix` | `code_write`；同样要求显式同 worktree `path`，再校验 01—07 阶段 |
-| 未分类的本地或 MCP 工具 | Git/旧 FlowGuard 项目中拒绝；先补工具副作用分类及回归测试，不能按名称猜测其只读性 |
+| 未分类的本地或 MCP 工具 | Git 项目中拒绝；先补工具副作用分类及回归测试，不能按名称猜测其只读性 |
 
-`.flowguard/contexts`、`.flowguard/evidence`、journal、`project.json` 禁止通过文件编辑工具直接修改，返回 `governance_state_protected`。
+宿主会话缓存（上下文/锁）位于仓库外的宿主状态目录，写入目标越出当前 Git worktree 返回 `governance_write_target_mismatch`；`docs/` 阶段机器区（阶段状态表、证据表）只能经 FlowGuard CLI 变更，直接手改会因指纹不匹配而失效。
 CodeGuard MCP 的宿主配置若使用其他服务器名，本表不自动匹配；需按实际工具名另做审计和测试。精确名字分类只是副作用路由，不是 MCP 来源认证或结果可信度证明。
 
 拒绝输出至少包含：

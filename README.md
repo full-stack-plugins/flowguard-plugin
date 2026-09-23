@@ -84,16 +84,16 @@ Denials use exit code 2 and return `code / message / fix / missing / allowed_act
 
 See [hooks/__protocol__.md](hooks/__protocol__.md).
 
-## Document locations and legacy migration
+## Document locations
 
-Project stages 02/07/10 live in `docs/project/`; feature stages 01/03/04/05/06/08/09 live in `docs/features/<task-id>/`. New projects do not create `.flowguard/`; session cache lives outside the repository. For existing projects, run `migrate --dry-run`, resolve conflicts, then `migrate --apply`; retain the original data until verified. If migration stops midway, newly created documents are listed and kept for inspection rather than deleting files another process may have edited. `legacy-init` is only for old-command compatibility.
+Project stages 02/07/10 live in `docs/project/`; feature stages 01/03/04/05/06/08/09 live in `docs/features/<task-id>/`. Session cache lives outside the repository in the host state directory. The legacy `.flowguard/` layout and its migration commands were removed in v0.4.0; `docs/legacy-flowguard/` in this repository is a read-only historical archive.
 
 ## Documentation
 
 - [Current architecture](docs/FlowGuard-Architecture.zh_CN.md)
 - [Ten-stage docs governance specification](docs/superpowers/specs/2026-09-23-flowguard-docs-ten-stage-governance.md)
 - [Implementation plan](docs/superpowers/plans/2026-09-23-flowguard-agent-driven-sdd-governance.md)
-- [Legacy artifact contract](docs/FLOWGUARD_ARTIFACT_SPEC.md)
+- [Artifact contract](docs/FLOWGUARD_ARTIFACT_SPEC.md)
 - [Roadmap](docs/roadmap.md)
 
 ## Verification

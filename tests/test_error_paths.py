@@ -1,5 +1,10 @@
 """错误路径与诊断信封契约：一切 CLI/hook 错误必须走 {severity,code,message,fix}，不裸崩。"""
-import json, subprocess, sys, tempfile, unittest
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import unittest
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -15,29 +20,37 @@ def run(root, *argv):
 class ErrorPathTest(unittest.TestCase):
     def setUp(self):
         self.root = Path(tempfile.mkdtemp())
-        (self.root / "pom.xml").write_text("<project/>", encoding="utf-8")
-        (self.root / ".flowguard").mkdir()  # 显式旧项目夹具
-        self.assertEqual(run(self.root, "legacy-init", "--json").returncode, 0)
-        self.assertEqual(run(self.root, "feature", "new", "f1", "--modules", "app", "--json").returncode, 0)
+        bound = run(self.root, "context", "bind", "--session", "s", "--task-id", "f1",
+                    "--task-type", "simple_change", "--spec-system", "none", "--json")
+        self.assertEqual(bound.returncode, 0, bound.stderr)
 
-    def test_unknown_artifact_gets_envelope(self):
-        r = run(self.root, "instructions", "99-bogus", "--json")
-        self.assertEqual(r.returncode, 3)
-        env = json.loads(r.stdout)
-        self.assertEqual(env["code"], "unknown_artifact")
+    def _envelope(self, result):
+        self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+        env = json.loads(result.stdout)
         self.assertEqual(set(env), {"severity", "code", "message", "fix"})
-        self.assertNotIn("Traceback", r.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+        return env
 
-    def test_status_unknown_feature_gets_envelope(self):
-        r = run(self.root, "status", "--feature", "nope", "--json")
-        self.assertEqual(r.returncode, 3)
-        env = json.loads(r.stdout)
-        self.assertEqual(env["code"], "unknown_feature")
+    def test_unknown_task_gets_envelope(self):
+        env = self._envelope(run(self.root, "stage", "status", "--task-id", "nope", "--json"))
+        self.assertEqual(env["code"], "state_error")
 
-    def test_status_feature_filters(self):
-        r = run(self.root, "status", "--feature", "f1", "--json")
-        self.assertEqual(r.returncode, 0, r.stdout)
-        self.assertEqual(list(json.loads(r.stdout)["features"]), ["f1"])
+    def test_stage_advance_requires_approval_ref(self):
+        env = self._envelope(run(
+            self.root, "stage", "advance", "--task-id", "f1",
+            "--stage", "01-requirements", "--status", "accepted", "--json"))
+        self.assertIn("批准", env["message"])
+
+    def test_evidence_record_unknown_context_gets_envelope(self):
+        env = self._envelope(run(
+            self.root, "evidence", "record", "--context-id", "missing",
+            "--kind", "tests", "--producer", "t", "--result", "pass",
+            "--summary", "s", "--source-ref", "r", "--json"))
+        self.assertEqual(env["code"], "state_error")
+
+    def test_context_show_unbound_gets_envelope(self):
+        env = self._envelope(run(self.root, "context", "show", "--json"))
+        self.assertEqual(env["code"], "context_not_bound")
 
     def test_usage_error_exit3_with_envelope(self):
         r = run(self.root, "bogus-cmd")
@@ -48,12 +61,6 @@ class ErrorPathTest(unittest.TestCase):
         self.assertEqual(r2.returncode, 3)
         self.assertEqual(json.loads(r2.stdout)["code"], "usage")
         self.assertNotIn("Traceback", r.stderr + r2.stderr)
-
-    def test_drop_without_reason(self):
-        r = run(self.root, "feature", "drop", "f1", "--json")
-        self.assertEqual(r.returncode, 3)
-        env = json.loads(r.stdout)
-        self.assertIn("reason", env["code"].lower() + env["message"].lower())
 
 
 class HookErrorPathTest(unittest.TestCase):
@@ -80,14 +87,26 @@ class HookErrorPathTest(unittest.TestCase):
     def test_governance_summary_hooks_fail_open_on_corrupt_context_index(self):
         root = Path(tempfile.mkdtemp())
         subprocess.run(["git", "init", "-q"], cwd=root, check=True)
-        index = root / ".flowguard" / "contexts" / "index.json"
-        index.parent.mkdir(parents=True)
+        state_home = Path(tempfile.mkdtemp())
+        old_home = os.environ.get("FLOWGUARD_STATE_HOME")
+        os.environ["FLOWGUARD_STATE_HOME"] = str(state_home)
+        try:
+            sys.path.insert(0, str(REPO / "scripts"))
+            from flowguard_lib import runtime
+            index = runtime.repository_state_dir(root) / "contexts" / "index.json"
+        finally:
+            if old_home is None:
+                os.environ.pop("FLOWGUARD_STATE_HOME", None)
+            else:
+                os.environ["FLOWGUARD_STATE_HOME"] = old_home
+        index.parent.mkdir(parents=True, exist_ok=True)
         index.write_text("{broken", encoding="utf-8")
+        env = dict(os.environ, FLOWGUARD_STATE_HOME=str(state_home))
         for hook in ("flowguard_status_summary.py", "flowguard_prompt_guard.py", "flowguard_stage_summary.py"):
             p = subprocess.run(
                 [sys.executable, str(HOOKS / hook)],
                 input=json.dumps({"cwd": str(root), "session_id": "s"}),
-                capture_output=True, text=True,
+                capture_output=True, text=True, env=env,
             )
             self.assertEqual(p.returncode, 0, f"{hook}: {p.stderr}")
             self.assertNotIn("Traceback", p.stderr)

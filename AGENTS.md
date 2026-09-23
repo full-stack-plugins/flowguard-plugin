@@ -4,11 +4,11 @@
 
 ## 全局约束（照 spec 决策表）
 
-- 命名：仓库 `flowguard-plugin`、name `flowguard`、displayName「研发流程门禁」、i18n en "FlowGuard: R&D Process Gate"、命令前缀 `/flowguard-*`。十阶段产物只写 `docs/project/` 与 `docs/features/<task-id>/`；新项目不得创建 `.flowguard/`。
+- 命名：仓库 `flowguard-plugin`、name `flowguard`、displayName「研发流程门禁」、i18n en "FlowGuard: R&D Process Gate"、命令前缀 `/flowguard-*`。十阶段产物只写 `docs/project/` 与 `docs/features/<task-id>/`；仓库内不得出现 `.flowguard/`。
 - Python 仅标准库；测试用 `python3 -m unittest discover -s tests`（不是 pytest）。
 - SKILL.md ≤ 500 行；frontmatter 必含 `name`（kebab，与目录同名）/ `license: Apache-2.0` / `description`（含触发词与负面边界）/ `compatibility`。
 - 跨技能引用只用「技能名 + `npx skills add <org>/<pkg> --skill <name>`」，禁止 `../` 相对路径指向其它技能。
-- 十阶段由智能体推进，Hook 只校验与拦截；门禁无 strict_mode 软化开关。用户批准与验收不得由 agent 伪造；旧状态仅供迁移和兼容读取。
+- 十阶段由智能体推进，Hook 只校验与拦截；门禁无 strict_mode 软化开关。用户批准与验收不得由 agent 伪造。
 - REQ-ID 全局唯一，格式 `<feature-id>/REQ-<n>`；feature-id/模块名 kebab `^[a-z0-9]+(?:-[a-z0-9]+)*$`。
 - 门禁/校验输出统一诊断信封基础字段 `{severity, code, message, fix}`；新治理拒绝可追加 `missing/allowed_actions`。
 - 四宿主 manifest 版本字段必须一致（`.codex-plugin/plugin.json` 例外：`<v>+codex.<YYYYMMDD>`）；`.zcode-plugin/plugin.json` 不得含 `hooks` 键；不得含占位 `mcpServers`。
@@ -37,5 +37,5 @@
 
 - 当前规格（单一权威）：`docs/superpowers/specs/2026-09-23-flowguard-docs-ten-stage-governance.md`
 - 当前实施计划：`docs/superpowers/plans/2026-09-23-flowguard-agent-driven-sdd-governance.md`
-- v0.2 的“十阶段仅兼容”决策已被当前规格取代；旧 `.flowguard/` 仅是迁移输入，不得作为新任务默认产物。
+- v0.2 的“十阶段仅兼容”决策已被当前规格取代；`.flowguard/` 兼容/迁移线已于 v0.4.0（2026-09-23）下线，旧命令面一并移除。
 - 钩子协议：`hooks/__protocol__.md`（改协议必须同 commit 更新契约与测试）

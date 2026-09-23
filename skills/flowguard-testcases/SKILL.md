@@ -2,7 +2,7 @@
 name: flowguard-testcases
 license: Apache-2.0
 description: 测试用例阶段（厚阶段）。当用户要写测试用例、建追溯矩阵、或在写码前定测试计划时使用；每条用例必须标注 REQ 与测试文件（TDD 门槛的机械检查依据）。不要用它实际运行测试或写业务代码。
-compatibility: Python 3 标准库；十阶段文档位于 docs/，无需项目 .flowguard/ 目录。
+compatibility: Python 3 标准库；十阶段文档位于 docs/。
 ---
 
 # flowguard-testcases —— 产出测试用例 04-testcases.md：用例 + 追溯矩阵（REQ↔用例↔测试文件）。

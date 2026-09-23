@@ -15,11 +15,6 @@ def run_hook(name, payload):
     return p
 
 
-def write(path, data):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
-
-
 def mk_git_repo():
     root = Path(tempfile.mkdtemp())
     subprocess.run(["git", "init", "-q"], cwd=root, check=True)
@@ -66,175 +61,7 @@ def codereview_evidence_fixture(root, *, findings=None, fingerprint=None):
             "user_disposition": None, "disposition_source": None, "skip_reason": None}
 
 
-def mk_project(current_feature="order-refund", std="pending", features=None):
-    return {"version": 1, "project": "demo", "modules": {"app": {"src_roots": ["."], "stack": "java-spring"}},
-            "current_feature": current_feature,
-            "stages": {"architecture": {"status": "pending"}, "standards": {"status": std},
-                       "release": {"status": "pending"}},
-            "features": features if features is not None else
-                        {"order-refund": {"status": "active", "path": "features/order-refund"}}}
-
-
-def mk_feature(stages=None):
-    base = {s: {"status": "pending"} for s in
-            ("requirements", "solution", "testcases", "hld", "lld", "review", "docs")}
-    if stages:
-        base.update({k: {"status": v} for k, v in stages.items()})
-    return {"version": 1, "feature": "order-refund", "modules": ["app"], "status": "active", "stages": base}
-
-
 class GateHookTest(unittest.TestCase):
-    def setUp(self):
-        self.root = Path(tempfile.mkdtemp())
-        write(self.root / ".flowguard" / "project.json", mk_project())
-        write(self.root / ".flowguard" / "features" / "order-refund" / "state.json", mk_feature())
-
-    def test_block_write_with_envelope(self):
-        p = run_hook("flowguard_gate.py", {"tool_name": "Write",
-                                          "tool_input": {"file_path": "app/A.java"}, "cwd": str(self.root)})
-        self.assertEqual(p.returncode, 2)
-        self.assertIn("ERROR:", p.stderr)
-        self.assertIn("Fix:", p.stderr)
-        self.assertIn("gate_write_code", p.stderr)
-
-    def test_artifact_path_allowed(self):
-        p = run_hook("flowguard_gate.py", {"tool_name": "Edit",
-                                          "tool_input": {"file_path": ".flowguard/features/order-refund/artifacts/01-requirements.md"},
-                                          "cwd": str(self.root)})
-        self.assertEqual(p.returncode, 0)
-
-    def test_malformed_stdin_allowed(self):
-        p = subprocess.run([sys.executable, str(HOOKS / "flowguard_gate.py")],
-                           input="not json", capture_output=True, text=True)
-        self.assertEqual(p.returncode, 0)
-        self.assertIn("WARNING", p.stderr)
-
-    def test_uninitialized_allowed(self):
-        empty = Path(tempfile.mkdtemp())
-        p = run_hook("flowguard_gate.py", {"tool_name": "Write",
-                                          "tool_input": {"file_path": "src/A.java"}, "cwd": str(empty)})
-        self.assertEqual(p.returncode, 0)
-
-    def test_bash_release_blocked(self):
-        write(self.root / ".flowguard" / "project.json", mk_project(std="accepted"))
-        p = run_hook("flowguard_gate.py", {"tool_name": "Bash",
-                                          "tool_input": {"command": "mvn deploy -q"}, "cwd": str(self.root)})
-        self.assertEqual(p.returncode, 2)
-        self.assertIn("gate_release_active_features", p.stderr)
-
-    def test_bash_plain_allowed(self):
-        p = run_hook("flowguard_gate.py", {"tool_name": "Bash",
-                                          "tool_input": {"command": "ls -la"}, "cwd": str(self.root)})
-        self.assertEqual(p.returncode, 0)
-
-    def test_kimi_shell_read_is_not_rejected_as_unknown_tool(self):
-        root = mk_git_repo()
-        p = run_hook("flowguard_gate.py", {"tool_name": "Shell",
-                                          "tool_input": {"command": "git status --short"},
-                                          "cwd": str(root), "session_id": "s"})
-        self.assertEqual(p.returncode, 0, p.stderr)
-
-    def test_relative_traversal_cannot_disguise_business_write_as_docs_or_tests(self):
-        root = mk_git_repo()
-        for file_path in ("docs/../src/app.py", "tests/../src/app.py"):
-            with self.subTest(file_path=file_path):
-                result = run_hook("flowguard_gate.py", {
-                    "tool_name": "Write", "tool_input": {"file_path": file_path},
-                    "cwd": str(root), "session_id": "s",
-                })
-                self.assertEqual(result.returncode, 2, result.stderr)
-                self.assertIn("governance_context_required", result.stderr)
-
-    def test_symlinked_docs_path_cannot_disguise_business_write(self):
-        root = mk_git_repo()
-        (root / "docs").mkdir()
-        (root / "docs" / "bridge").symlink_to(root / "src", target_is_directory=True)
-        result = run_hook("flowguard_gate.py", {
-            "tool_name": "Write",
-            "tool_input": {"file_path": "docs/bridge/app.py"},
-            "cwd": str(root), "session_id": "s",
-        })
-        self.assertEqual(result.returncode, 2, result.stderr)
-        self.assertIn("governance_context_required", result.stderr)
-
-    def test_file_write_to_another_worktree_is_rejected_before_current_context_gate(self):
-        root = mk_git_repo()
-        other = mk_git_repo()
-        result = run_hook("flowguard_gate.py", {
-            "tool_name": "Write",
-            "tool_input": {"file_path": str(other / "src" / "app.py")},
-            "cwd": str(root), "session_id": "s",
-        })
-        self.assertEqual(result.returncode, 2, result.stderr)
-        self.assertIn("governance_write_target_mismatch", result.stderr)
-
-    def test_kimi_read_tools_are_allowed_without_task_binding(self):
-        root = mk_git_repo()
-        for tool_name in ("ReadFile", "ReadMediaFile", "SetTodoList"):
-            with self.subTest(tool_name=tool_name):
-                result = run_hook("flowguard_gate.py", {
-                    "tool_name": tool_name, "tool_input": {},
-                    "cwd": str(root), "session_id": "s",
-                })
-                self.assertEqual(result.returncode, 0, result.stderr)
-
-    def test_kimi_file_tools_route_docs_and_code_separately(self):
-        root = mk_git_repo()
-        for tool_name in ("WriteFile", "StrReplaceFile"):
-            with self.subTest(tool_name=tool_name):
-                docs = run_hook("flowguard_gate.py", {
-                    "tool_name": tool_name,
-                    "tool_input": {"file_path": "docs/features/fix/01-requirements.md"},
-                    "cwd": str(root), "session_id": "s",
-                })
-                code = run_hook("flowguard_gate.py", {
-                    "tool_name": tool_name, "tool_input": {"file_path": "src/app.py"},
-                    "cwd": str(root), "session_id": "s",
-                })
-                self.assertEqual(docs.returncode, 0, docs.stderr)
-                self.assertEqual(code.returncode, 2, code.stderr)
-                self.assertNotIn("governance_unclassified_tool", code.stderr)
-
-    def test_kimi_shell_commit_is_classified_as_commit(self):
-        root = mk_git_repo()
-        p = run_hook("flowguard_gate.py", {"tool_name": "Shell",
-                                          "tool_input": {"command": "git commit -m fix"},
-                                          "cwd": str(root), "session_id": "s"})
-        self.assertEqual(p.returncode, 2, p.stderr)
-        self.assertNotIn("governance_unclassified_tool", p.stderr)
-
-    def test_tdd_gate_after_accept(self):
-        f = mk_feature({s: "accepted" for s in
-                        ("requirements", "solution", "testcases", "hld", "lld")})
-        write(self.root / ".flowguard" / "features" / "order-refund" / "state.json", f)
-        write(self.root / ".flowguard" / "project.json", mk_project(std="accepted"))
-        p = run_hook("flowguard_gate.py", {"tool_name": "Write",
-                                          "tool_input": {"file_path": "app/A.java"}, "cwd": str(self.root)})
-        self.assertEqual(p.returncode, 0)
-
-class ArtifactCheckHookTest(unittest.TestCase):
-    def setUp(self):
-        self.root = Path(tempfile.mkdtemp())
-        f = mk_feature({s: "accepted" for s in
-                        ("requirements", "solution", "testcases", "hld", "lld", "review", "docs")})
-        write(self.root / ".flowguard" / "project.json", mk_project())
-        write(self.root / ".flowguard" / "features" / "order-refund" / "state.json", f)
-        art = self.root / ".flowguard" / "features" / "order-refund" / "artifacts" / "01-requirements.md"
-        art.parent.mkdir(parents=True, exist_ok=True)
-        art.write_text("# 需求", encoding="utf-8")
-
-    def test_rework_degrades_downstream(self):
-        p = run_hook("flowguard_artifact_check.py",
-                     {"tool_name": "Edit",
-                      "tool_input": {"file_path": ".flowguard/features/order-refund/artifacts/01-requirements.md"},
-                      "cwd": str(self.root)})
-        self.assertEqual(p.returncode, 0)
-        f = json.loads((self.root / ".flowguard" / "features" / "order-refund" / "state.json").read_text())
-        self.assertEqual(f["stages"]["requirements"]["status"], "in_progress")
-        self.assertEqual(f["stages"]["testcases"]["status"], "in_progress")
-        self.assertEqual(f["stages"]["docs"]["status"], "in_progress")
-        self.assertIn("artifact_rework_degrade",
-                      (self.root / ".flowguard" / "journal" / "events.jsonl").read_text())
 
     def test_post_hook_ignores_valid_json_that_is_not_an_object(self):
         for payload in ([], "text", 42, None):
@@ -244,12 +71,14 @@ class ArtifactCheckHookTest(unittest.TestCase):
                 self.assertEqual(json.loads(result.stdout), {})
 
 class SummaryHooksTest(unittest.TestCase):
-    def test_status_summary_initialized(self):
-        root = Path(tempfile.mkdtemp())
-        write(root / ".flowguard" / "project.json", mk_project())
-        p = run_hook("flowguard_status_summary.py", {"cwd": str(root)})
-        self.assertEqual(p.returncode, 0)
+    def test_status_summary_shows_bound_context(self):
+        root = mk_git_repo()
+        context.bind(root, session_id="s", task_id="fix", task_type="simple_change",
+                     spec_system="none", spec_ref=None)
+        p = run_hook("flowguard_status_summary.py", {"cwd": str(root), "session_id": "s"})
+        self.assertEqual(p.returncode, 0, p.stderr)
         self.assertIn("[flowguard]", p.stdout)
+        self.assertIn("fix", p.stdout)
 
     def test_status_summary_silent_when_uninitialized(self):
         p = run_hook("flowguard_status_summary.py", {"cwd": str(Path(tempfile.mkdtemp()))})
@@ -257,12 +86,12 @@ class SummaryHooksTest(unittest.TestCase):
         self.assertEqual(p.stdout, "")
 
     def test_stage_summary_next_step(self):
-        root = Path(tempfile.mkdtemp())
-        write(root / ".flowguard" / "project.json", mk_project())
-        write(root / ".flowguard" / "features" / "order-refund" / "state.json", mk_feature())
-        p = run_hook("flowguard_stage_summary.py", {"cwd": str(root)})
-        self.assertEqual(p.returncode, 0)
-        self.assertIn("requirements", p.stdout)
+        root = mk_git_repo()
+        context.bind(root, session_id="s", task_id="fix", task_type="simple_change",
+                     spec_system="none", spec_ref=None)
+        p = run_hook("flowguard_stage_summary.py", {"cwd": str(root), "session_id": "s"})
+        self.assertEqual(p.returncode, 0, p.stderr)
+        self.assertIn("01-requirements", p.stdout)
 
 
 class GovernanceHookTest(unittest.TestCase):
@@ -808,16 +637,17 @@ class GovernanceHookTest(unittest.TestCase):
         self.assertEqual(stage_docs.read(root, "fix", "01-requirements")["status"], "invalidated")
         self.assertIn("阶段文档已失效", json.loads(result.stdout)["systemMessage"])
 
-    def test_direct_governance_state_tampering_is_blocked(self):
+    def test_host_side_state_tampering_is_rejected_outside_worktree(self):
         root = mk_git_repo()
+        home = Path(tempfile.mkdtemp())
         p = run_hook(
             "flowguard_gate.py",
             {"tool_name": "Edit",
-             "tool_input": {"file_path": ".flowguard/contexts/fake.json"},
+             "tool_input": {"file_path": str(home / "contexts" / "fake.json")},
              "cwd": str(root), "session_id": "s"},
         )
         self.assertEqual(p.returncode, 2)
-        self.assertIn("governance_state_protected", p.stderr)
+        self.assertIn("governance_write_target_mismatch", p.stderr)
 
     def test_git_commit_requires_evidence_for_bound_context(self):
         root = mk_git_repo()

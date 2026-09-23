@@ -2,7 +2,7 @@
 name: flowguard-architecture
 license: Apache-2.0
 description: 架构设计阶段（项目级，走一次）。当用户要定技术选型、写 ADR、划模块边界时使用；ADR 一律追加式并标注来源功能，禁止改写既有条目。不要用它写单个功能的技术方案（那是 flowguard-solution）。
-compatibility: Python 3 标准库；十阶段文档位于 docs/，无需项目 .flowguard/ 目录。
+compatibility: Python 3 标准库；十阶段文档位于 docs/。
 ---
 
 # flowguard-architecture —— 产出项目架构产物 02-architecture.md：选型 / ADR 追加式列表 / 模块边界。

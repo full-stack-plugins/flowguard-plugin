@@ -27,12 +27,12 @@
 8. 更新架构、README、Hook 协议和路线图。
 9. 执行目标测试、全量 unittest、生成 parity、插件验证和 `git diff --check`。
 
-## 3. 兼容策略
+## 3. 兼容策略（2026-09-23 更新：兼容线已下线）
 
-- 不删除或重写现有 `.flowguard` 产物。
+- ~~不删除或重写现有 `.flowguard` 产物。~~ v0.4.0 起 `.flowguard` 兼容/迁移线全面下线，旧命令面移除；`docs/legacy-flowguard/` 保留为只读历史归档。
 - 不把旧 accepted 状态迁移为新用户批准或新证据。
-- 旧命令本版本继续可用，但输出兼容提示；新任务文档只推荐治理命令。
-- 版本按仓库发布规则升级；本轮不提交、不推送、不创建 Release，除非用户后续明确要求。
+- ~~旧命令本版本继续可用，但输出兼容提示；~~ 新任务只使用治理命令（init/discover/context/evidence/governance/stage/validate）。
+- 版本按仓库发布规则升级。
 
 ## 4. 完成定义
 

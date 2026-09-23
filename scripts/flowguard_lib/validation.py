@@ -37,15 +37,16 @@ def _mask_code_fences(lines):
 
 
 def requirement_ids(text):
-    """抽取各 requirement 正文首行反引号内的 REQ-ID。"""
+    """抽取各 requirement 正文首行反引号内的 REQ-ID；含占位符的模板示例块不参与机械校验。"""
     lines = text.splitlines()
     masked = _mask_code_fences(lines)
-    found, current_req = [], False
+    found, current_req, placeholder = [], False, False
     for ln, hide in zip(lines, masked):
         if hide:
             continue
         if re.match(r"^### Requirement:", ln):
             current_req, body_seen = True, False
+            placeholder = ("<" in ln) or ("{{" in ln)
             continue
         if current_req:
             if re.match(r"^#### Scenario:", ln):
@@ -53,8 +54,10 @@ def requirement_ids(text):
                 continue
             if not body_seen and ln.strip():
                 body_seen = True
+                if "<" in ln or "{{" in ln:
+                    placeholder = True
                 m = re.search(r"`([^`]+)`", ln)
-                if m and ids.parse_req_id(m.group(1)):
+                if m and ids.parse_req_id(m.group(1)) and not placeholder:
                     found.append(m.group(1))
     return found
 
@@ -64,22 +67,24 @@ def validate_requirements(text, feature):
     masked = _mask_code_fences(lines)
     issues = []
     seen_names = {}
-    in_req, req_name, req_line, body_lines, scenario_count = False, "", 0, [], 0
+    in_req, req_name, req_line, body_lines, scenario_count, placeholder = False, "", 0, [], 0, False
 
     def flush():
-        nonlocal in_req, req_name, req_line, body_lines, scenario_count
+        nonlocal in_req, req_name, req_line, body_lines, scenario_count, placeholder
         if not in_req:
             return
-        body = "\n".join(body_lines)
-        if not re.search(r"\b(SHALL|MUST)\b", body):
-            issues.append(_issue("WARNING", "01-requirements.md",
-                                 f"requirement「{req_name}」正文缺 SHALL/MUST",
-                                 HINTS["shall"], line=req_line))
-        if scenario_count < 1:
-            issues.append(_issue("WARNING", "01-requirements.md",
-                                 f"requirement「{req_name}」无 Scenario",
-                                 HINTS["scenario_count"], line=req_line))
+        if not placeholder:
+            body = "\n".join(body_lines)
+            if not re.search(r"\b(SHALL|MUST)\b", body):
+                issues.append(_issue("WARNING", "01-requirements.md",
+                                     f"requirement「{req_name}」正文缺 SHALL/MUST",
+                                     HINTS["shall"], line=req_line))
+            if scenario_count < 1:
+                issues.append(_issue("WARNING", "01-requirements.md",
+                                     f"requirement「{req_name}」无 Scenario",
+                                     HINTS["scenario_count"], line=req_line))
         in_req = False
+        placeholder = False
 
     for no, (ln, hide) in enumerate(zip(lines, masked), 1):
         if hide:
@@ -92,6 +97,7 @@ def validate_requirements(text, feature):
             req_name = m_req.group(1).strip()
             req_line = no
             in_req, body_lines, scenario_count = True, [], 0
+            placeholder = ("<" in ln) or ("{{" in ln)
             folded = ids.fold_name(req_name)
             if folded in seen_names:
                 issues.append(_issue("WARNING", "01-requirements.md",
@@ -115,6 +121,8 @@ def validate_requirements(text, feature):
                                  HINTS["scenario_header"], line=no))
             continue
         if in_req:
+            if "<" in ln or "{{" in ln:
+                placeholder = True
             body_lines.append(ln)
     flush()
 

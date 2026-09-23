@@ -1,5 +1,5 @@
 {
   "name": "flowguard-stage",
   "description": "查看和推进 docs/ 中的十阶段文档",
-  "prompt": "运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" stage status --task-id <task-id> --json` 查看阶段。写入 docs/project/ 或 docs/features/<task-id>/ 对应文档并自检后，可运行 `... flowguard_state.py stage advance --task-id <task-id> --stage <阶段文件名> --status in_progress --json`；只有真实用户批准或可审计依据才可将阶段标记 accepted/inherited/skipped。不能用模型自述伪造批准；旧 .flowguard/ 仅是迁移输入。"
+  "prompt": "运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" stage status --task-id <task-id> --json` 查看阶段。写入 docs/project/ 或 docs/features/<task-id>/ 对应文档并自检后，可运行 `... flowguard_state.py stage advance --task-id <task-id> --stage <阶段文件名> --status in_progress --json`；只有真实用户批准或可审计依据才可将阶段标记 accepted/inherited/skipped。不能用模型自述伪造批准。"
 }

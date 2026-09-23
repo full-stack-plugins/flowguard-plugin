@@ -8,9 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from flowguard_lib import context, discovery, stage_docs, state  # noqa: E402
-
-FEATURE_STAGES = ("requirements", "solution", "testcases", "hld", "lld", "review", "docs")
+from flowguard_lib import context, discovery, stage_docs  # noqa: E402
 
 
 def main():
@@ -65,22 +63,6 @@ def main():
                         f"| parent={task['parent_task_id'] or '-'} "
                         f"| 下一步={task['next_stage'] or '全部满足'}"
                     )
-    try:
-        project = state.load_project(cwd)
-    except Exception:
-        project = None
-    if project:
-        lines.append(
-            f"[flowguard] 兼容状态: 项目 {project['project']} | "
-            f"legacy current_feature={project.get('current_feature') or '未设定'}"
-        )
-        for fid in (project.get("features") or {}):
-            try:
-                f = state.load_feature(cwd, fid)
-            except Exception:
-                continue
-            sts = " ".join(f"{s[0]}={f['stages'][s]['status']}" for s in FEATURE_STAGES)
-            lines.append(f"[flowguard] 兼容功能 {fid}({f.get('status')}): {sts}")
     if lines:
         print("\n".join(lines))
     return 0

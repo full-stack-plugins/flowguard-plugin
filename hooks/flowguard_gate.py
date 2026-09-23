@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from flowguard_lib import discovery, gate, governance, registry, tool_scope  # noqa: E402
+from flowguard_lib import discovery, governance, registry, tool_scope  # noqa: E402
 
 CODEGUARD_MCP_ACTIONS = {
     "mcp__codeguard__list_languages": "read",
@@ -68,10 +68,6 @@ def _write_action(cwd, path):
     rel = _relative(cwd, path)
     if rel.startswith((".specify/", "openspec/", "docs/")):
         return "spec_write"
-    if rel.startswith(".flowguard/") and (
-        "/artifacts/" in rel or rel.startswith(".flowguard/project/")
-    ):
-        return "spec_write"  # 旧产物兼容：允许补规格以解除阻断
     parts = Path(rel).parts
     name = Path(rel).name.lower()
     if (
@@ -83,13 +79,6 @@ def _write_action(cwd, path):
     ):
         return "test_write"
     return "code_write"
-
-
-def _protected_governance_path(cwd, path):
-    rel = _relative(cwd, path)
-    return rel.startswith((
-        ".flowguard/contexts/", ".flowguard/evidence/", ".flowguard/journal/",
-    )) or rel in (".flowguard/project.json",)
 
 
 def _patch_paths(command):
@@ -294,27 +283,11 @@ def main():
     if tool == "apply_patch":
         paths = _patch_paths(tool_input.get("command"))
         write_targets = paths
-        if any(_protected_governance_path(cwd, item) for item in paths):
-            _print_denial({
-                "code": "governance_state_protected",
-                "message": "FlowGuard 治理状态禁止通过补丁直接修改",
-                "fix": "使用 FlowGuard CLI 变更状态，以保留校验和审计记录",
-            })
-            return 2
         actions = {_write_action(cwd, item) for item in paths} if paths else {"code_write"}
         action = next(item for item in ("code_write", "test_write", "spec_write") if item in actions)
     elif tool in ("Write", "Edit", "MultiEdit", "WriteFile", "StrReplaceFile"):
         path = tool_input.get("file_path")
         write_targets = [path] if isinstance(path, str) and path else []
-        if isinstance(path, str) and path and _protected_governance_path(cwd, path):
-            _print_denial({
-                "code": "governance_state_protected",
-                "message": "FlowGuard 治理状态禁止通过文件编辑工具直接修改",
-                "fix": "使用 context/evidence/legacy CLI 变更状态，以保留校验和审计记录",
-                "missing": [],
-                "allowed_actions": ["read", "spec_write"],
-            })
-            return 2
         action = _write_action(cwd, path) if isinstance(path, str) and path else "code_write"
     elif tool in ("Bash", "Shell"):
         command = tool_input.get("command")
@@ -408,16 +381,6 @@ def main():
                 "fix": "进入目标 worktree，执行 SDD 发现与任务绑定后再提交",
             })
             return 2
-        elif (Path(cwd) / ".flowguard" / "project.json").exists():
-            if action == "unclassified":
-                _print_denial({
-                    "code": "governance_unclassified_tool",
-                    "message": f"旧 FlowGuard 项目无法判定工具 {tool!r} 的副作用",
-                    "fix": "改用已识别工具，或为该工具添加明确的风险分类",
-                })
-                return 2
-            legacy_action = "build_release" if action == "release" else "write_code"
-            res = gate.check_action(Path(cwd), legacy_action, path=path)
         else:
             return 0
     except Exception as e:  # 钩子自身崩溃 = 放行 + 警告

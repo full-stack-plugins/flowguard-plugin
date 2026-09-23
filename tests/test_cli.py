@@ -1,4 +1,8 @@
-import json, subprocess, sys, tempfile, unittest
+import json
+import subprocess
+import sys
+import tempfile
+import unittest
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -10,75 +14,48 @@ def run(root, *argv):
                           capture_output=True, text=True)
 
 
-class CliTest(unittest.TestCase):
+class ValidateCliTest(unittest.TestCase):
+    """validate 面向 docs/features/<task-id>/：内容校验、追溯矩阵与 Tier2 检查。"""
+
     def setUp(self):
         self.root = Path(tempfile.mkdtemp())
-        (self.root / "pom.xml").write_text("<project/>", encoding="utf-8")
-        (self.root / ".flowguard").mkdir()  # 显式旧项目夹具
+        self.task = "order-refund"
+        bound = run(self.root, "context", "bind", "--session", "s", "--task-id", self.task,
+                    "--task-type", "simple_change", "--spec-system", "none", "--json")
+        self.assertEqual(bound.returncode, 0, bound.stderr)
 
-    def test_full_walk(self):
-        # init 幂等
-        r = run(self.root, "legacy-init", "--json")
-        self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertEqual(json.loads(r.stdout)["modules"], ["app"])
-        self.assertEqual(run(self.root, "legacy-init").returncode, 0)
-
-        # 功能创建 + 非法 id
-        r = run(self.root, "feature", "new", "order-refund", "--modules", "app", "--json")
-        self.assertEqual(r.returncode, 0, r.stderr)
-        r = run(self.root, "feature", "new", "Bad_ID", "--modules", "app")
-        self.assertEqual(r.returncode, 3)
-        r = run(self.root, "feature", "new", "order-refund", "--modules", "app")
-        self.assertEqual(r.returncode, 3)
-
-        # 未开始阶段：写码被门禁拒绝（exit 2，信封 code）
-        r = run(self.root, "gate", "--action", "write_code", "--path", "app/A.java", "--json")
-        self.assertEqual(r.returncode, 2)
-        self.assertIn("gate_write_code", r.stdout)
-
-        # 五个功能级阶段 next → advance（advance = 用户验收）
-        for _ in range(5):
-            self.assertEqual(run(self.root, "next", "--json").returncode, 0)
-            r = run(self.root, "advance", "--evidence", "用户确认", "--json")
-            self.assertEqual(r.returncode, 0, r.stderr)
-
-        # 项目级规范阶段（advance 必须显式 --stage，否则默认作用于 current_feature）
-        self.assertEqual(run(self.root, "next", "--stage", "standards", "--json").returncode, 0)
-        r = run(self.root, "advance", "--stage", "standards", "--evidence", "用户确认", "--json")
-        self.assertEqual(r.returncode, 0, r.stderr)
-
-        # 写码放行
-        r = run(self.root, "gate", "--action", "write_code", "--path", "app/A.java", "--json")
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-
-        # 看板
-        r = run(self.root, "status", "--json")
-        self.assertEqual(r.returncode, 0)
-        st = json.loads(r.stdout)
-        self.assertEqual(st["features"]["order-refund"]["stages"]["requirements"], "accepted")
-        self.assertEqual(st["current_feature"], "order-refund")
-
-        # override 留痕（review 阶段还在 pending）
-        r = run(self.root, "override", "--stage", "review", "--reason", "hotfix 需求", "--json")
-        self.assertEqual(r.returncode, 0, r.stderr)
-
-        # validate：全模板态（示例块含占位符）→ 不参与机械检查，validate 通过
+    def test_template_state_passes_with_tier2_warning_only(self):
         r = run(self.root, "validate", "--json")
-        self.assertEqual(r.returncode, 0, r.stdout)
-        self.assertTrue(json.loads(r.stdout)["ok"])
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        out = json.loads(r.stdout)
+        self.assertTrue(out["ok"])
+        self.assertTrue(all(i["level"] != "ERROR" for i in out["issues"]))
 
-        # 未初始化目录：gate 放行
-        empty = Path(tempfile.mkdtemp())
-        r = run(empty, "gate", "--action", "write_code", "--path", "src/A.java", "--json")
-        self.assertEqual(r.returncode, 0)
+    def test_wrong_feature_req_id_is_error(self):
+        path = self.root / "docs" / "features" / self.task / "01-requirements.md"
+        path.write_text(
+            "### 1.3 FlowGuard 阶段信息\n\n"
+            "| 字段 | 值 |\n|:---|:---|\n"
+            f"| 任务 | {self.task} |\n| 父任务 | - |\n| 阶段 | 01-requirements |\n"
+            "| 阶段状态 | pending |\n| 规格事实源 | none |\n| 原生产物 | - |\n"
+            "| 批准依据 | - |\n| 前置指纹 | - |\n| 验收指纹 | - |\n\n"
+            "## 3. 用户故事与验收标准\n\n"
+            "### Requirement: 退款接口\n`other/REQ-1` SHALL 提供退款。\n\n#### Scenario: 成功\n",
+            encoding="utf-8")
+        r = run(self.root, "validate", "--json")
+        self.assertEqual(r.returncode, 3)
+        out = json.loads(r.stdout)
+        self.assertFalse(out["ok"])
+        self.assertTrue(any("other/REQ-1" in i["message"] for i in out["issues"]))
 
-    def test_instructions_json(self):
-        self.assertEqual(run(self.root, "legacy-init", "--json").returncode, 0)
-        r = run(self.root, "instructions", "01-requirements", "--json")
-        self.assertEqual(r.returncode, 0)
-        ins = json.loads(r.stdout)
-        for key in ("artifact", "scope", "stage", "context", "rules", "template", "requires", "unlocks", "tier2"):
-            self.assertIn(key, ins)
+    def test_task_id_filter_and_unknown_task(self):
+        ok = run(self.root, "validate", "--task-id", self.task, "--json")
+        self.assertEqual(ok.returncode, 0, ok.stdout)
+        missing = run(self.root, "validate", "--task-id", "nope", "--json")
+        self.assertEqual(missing.returncode, 3)
+        self.assertEqual(json.loads(missing.stdout)["code"], "unknown_task")
+        self.assertFalse((self.root / ".flowguard").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

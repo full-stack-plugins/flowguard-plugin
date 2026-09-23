@@ -2,7 +2,7 @@
 name: flowguard-review
 license: Apache-2.0
 description: 代码审查阶段（薄）。当用户要求审查某功能的代码变更、或汇总审查发现项时使用；每条发现项必须带证据与结论。不要用它跑静态检查工具（codeguard-plugin 职责）。
-compatibility: Python 3 标准库；十阶段文档位于 docs/，无需项目 .flowguard/ 目录。
+compatibility: Python 3 标准库；十阶段文档位于 docs/。
 ---
 
 # flowguard-review —— 产出证据化代码审查报告 08-review.md：发现项（证据）+ 结论（fix/wontfix/deferred）。
