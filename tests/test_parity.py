@@ -50,16 +50,23 @@ class SkillFormatTest(unittest.TestCase):
                 count += len(list(t.glob("*.md")))
         self.assertEqual(count, 10)
 
-    def test_main_skill_drives_agent_governance_instead_of_fixed_pipeline(self):
+    def test_main_skill_drives_ten_stage_docs_pipeline(self):
         text = (REPO / "skills" / "flowguard" / "SKILL.md").read_text(encoding="utf-8")
-        for expected in ("智能体执行循环", "Spec Kit", "OpenSpec", "Superpowers", "context bind"):
+        for expected in ("智能体执行循环", "十阶段", "docs/project", "docs/features", "stage status",
+                         "Spec Kit", "OpenSpec", "Superpowers", "context bind"):
             self.assertIn(expected, text)
-        self.assertNotIn("把研发流程意图路由到正确的阶段技能", text)
 
-    def test_stage_skills_are_explicit_legacy_compatibility_only(self):
+    def test_shared_skills_do_not_assume_claude_shell_environment(self):
+        for path in (REPO / "skills").glob("*/SKILL.md"):
+            with self.subTest(skill=path.parent.name):
+                text = path.read_text(encoding="utf-8")
+                self.assertNotIn("${CLAUDE_PLUGIN_ROOT}", text)
+                self.assertIn("${FLOWGUARD_PLUGIN_ROOT:?}", text)
+
+    def test_stage_skills_write_docs_as_primary_artifacts(self):
         text = (REPO / "skills" / "flowguard-requirements" / "SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("兼容模式", text)
-        self.assertIn("仅当项目已有旧 `.flowguard` 十阶段状态", text)
+        self.assertIn("docs/features", text)
+        self.assertIn("stage advance", text)
 
 if __name__ == "__main__":
     unittest.main()

@@ -14,13 +14,14 @@ class CliTest(unittest.TestCase):
     def setUp(self):
         self.root = Path(tempfile.mkdtemp())
         (self.root / "pom.xml").write_text("<project/>", encoding="utf-8")
+        (self.root / ".flowguard").mkdir()  # 显式旧项目夹具
 
     def test_full_walk(self):
         # init 幂等
-        r = run(self.root, "init", "--json")
+        r = run(self.root, "legacy-init", "--json")
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertEqual(json.loads(r.stdout)["modules"], ["app"])
-        self.assertEqual(run(self.root, "init").returncode, 0)
+        self.assertEqual(run(self.root, "legacy-init").returncode, 0)
 
         # 功能创建 + 非法 id
         r = run(self.root, "feature", "new", "order-refund", "--modules", "app", "--json")
@@ -72,7 +73,7 @@ class CliTest(unittest.TestCase):
         self.assertEqual(r.returncode, 0)
 
     def test_instructions_json(self):
-        self.assertEqual(run(self.root, "init", "--json").returncode, 0)
+        self.assertEqual(run(self.root, "legacy-init", "--json").returncode, 0)
         r = run(self.root, "instructions", "01-requirements", "--json")
         self.assertEqual(r.returncode, 0)
         ins = json.loads(r.stdout)

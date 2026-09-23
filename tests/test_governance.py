@@ -2,6 +2,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -81,6 +82,13 @@ class ContextTest(unittest.TestCase):
         self.assertEqual(context.active(self.root, "session-a")["task_id"], "refund-api")
         self.assertEqual(context.active(self.root, "session-b")["task_id"], "refund-ui")
 
+    def test_repository_root_cannot_be_bound_as_formal_spec(self):
+        with self.assertRaisesRegex(context.ContextError, "规格引用不能是仓库根目录"):
+            context.bind(
+                self.root, session_id="s", task_id="refund",
+                task_type="important_change", spec_system="openspec", spec_ref=".",
+            )
+
     def test_parent_cannot_complete_before_required_child(self):
         parent = context.bind(
             self.root, session_id="s", task_id="refund",
@@ -135,6 +143,89 @@ class ContextTest(unittest.TestCase):
 
 
 class EvidenceTest(unittest.TestCase):
+    def test_unborn_repository_ignores_gitignored_files_in_evidence_fingerprint(self):
+        root = Path(tempfile.mkdtemp())
+        subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+        (root / ".gitignore").write_text("ignored.txt\n", encoding="utf-8")
+        ignored = root / "ignored.txt"
+        ignored.write_text("first\n", encoding="utf-8")
+        ctx = context.bind(
+            root, session_id="s", task_id="small-fix",
+            task_type="simple_change", spec_system="none", spec_ref=None,
+        )
+        evidence.record(
+            root, ctx["context_id"], kind="tests", producer="unittest",
+            result="pass", summary="passed", source_ref="run-1",
+        )
+        self.assertIn("tests", evidence.valid_kinds(root, ctx["context_id"]))
+
+        ignored.write_text("second\n", encoding="utf-8")
+
+        self.assertIn("tests", evidence.valid_kinds(root, ctx["context_id"]))
+
+    def test_untracked_symlink_does_not_hash_external_target_contents(self):
+        root = git_repo()
+        outside = Path(tempfile.mkdtemp()) / "outside.txt"
+        outside.write_text("first\n", encoding="utf-8")
+        (root / "outside-link").symlink_to(outside)
+        ctx = context.bind(
+            root, session_id="s", task_id="small-fix",
+            task_type="simple_change", spec_system="none", spec_ref=None,
+        )
+        evidence.record(
+            root, ctx["context_id"], kind="tests", producer="unittest",
+            result="pass", summary="passed", source_ref="run-1",
+        )
+        self.assertIn("tests", evidence.valid_kinds(root, ctx["context_id"]))
+
+        outside.write_text("second\n", encoding="utf-8")
+
+        self.assertIn("tests", evidence.valid_kinds(root, ctx["context_id"]))
+
+    def test_unrelated_openspec_change_does_not_expire_bound_task_evidence(self):
+        root = git_repo()
+        refund = root / "openspec" / "changes" / "refund"
+        other = root / "openspec" / "changes" / "other"
+        refund.mkdir(parents=True)
+        other.mkdir(parents=True)
+        (refund / "proposal.md").write_text("# Refund\n", encoding="utf-8")
+        (other / "proposal.md").write_text("# Other\n", encoding="utf-8")
+        subprocess.run(["git", "add", "openspec"], cwd=root, check=True)
+        subprocess.run(["git", "commit", "-qm", "spec baseline"], cwd=root, check=True)
+        ctx = context.bind(
+            root, session_id="s", task_id="refund", task_type="important_change",
+            spec_system="openspec", spec_ref="openspec/changes/refund",
+        )
+        evidence.record(
+            root, ctx["context_id"], kind="tests", producer="unittest",
+            result="pass", summary="passed", source_ref="run-1",
+        )
+
+        (other / "proposal.md").write_text("# Other updated\n", encoding="utf-8")
+        (other / "design.md").write_text("# Other design\n", encoding="utf-8")
+
+        self.assertIn("tests", evidence.valid_kinds(root, ctx["context_id"]))
+
+    def test_bound_spec_body_change_expires_task_evidence(self):
+        root = git_repo()
+        refund = root / "openspec" / "changes" / "refund"
+        refund.mkdir(parents=True)
+        proposal = refund / "proposal.md"
+        proposal.write_text("# Refund\n", encoding="utf-8")
+        ctx = context.bind(
+            root, session_id="s", task_id="refund", task_type="important_change",
+            spec_system="openspec", spec_ref="openspec/changes/refund",
+        )
+        evidence.record(
+            root, ctx["context_id"], kind="tests", producer="unittest",
+            result="pass", summary="passed", source_ref="run-1",
+        )
+        self.assertIn("tests", evidence.valid_kinds(root, ctx["context_id"]))
+
+        proposal.write_text("# Refund\n\nMust be idempotent.\n", encoding="utf-8")
+
+        self.assertNotIn("tests", evidence.valid_kinds(root, ctx["context_id"]))
+
     def test_code_change_marks_expiring_evidence_stale_without_deleting_history(self):
         root = git_repo()
         ctx = context.bind(
@@ -217,7 +308,10 @@ class GovernanceTest(unittest.TestCase):
         self.assertEqual(denied["envelope"]["code"], "governance_approval_required")
 
         context.approve(self.root, ctx["context_id"], "scope_approved", actor="user")
-        self.assertTrue(governance.evaluate(self.root, "code_write", session_id="s")["allowed"])
+        denied = governance.evaluate(self.root, "code_write", session_id="s")
+        self.assertEqual(denied["envelope"]["code"], "governance_stage_required")
+        with patch.object(governance.stage_docs, "missing_before", return_value=[]):
+            self.assertTrue(governance.evaluate(self.root, "code_write", session_id="s")["allowed"])
 
     def test_commit_requires_current_test_static_and_semantic_evidence(self):
         ctx = context.bind(
@@ -225,20 +319,74 @@ class GovernanceTest(unittest.TestCase):
             task_type="simple_change", spec_system="none", spec_ref=None,
         )
         denied = governance.evaluate(self.root, "git_commit", session_id="s")
-        self.assertEqual(
-            denied["envelope"]["missing"],
-            ["tests", "static_analysis", "semantic_review"],
-        )
+        self.assertEqual(denied["envelope"]["code"], "governance_stage_required")
         self.assertFalse(
             (self.root / ".flowguard" / "evidence").exists(),
             "只读门禁检查不能创建空证据目录",
         )
+        with patch.object(governance.stage_docs, "missing_before", return_value=[]):
+            denied = governance.evaluate(self.root, "git_commit", session_id="s")
+            self.assertEqual(denied["envelope"]["missing"],
+                             ["tests", "static_analysis", "semantic_review"])
         for kind in ("tests", "static_analysis", "semantic_review"):
             evidence.record(
                 self.root, ctx["context_id"], kind=kind, producer="test",
                 result="pass", summary=f"{kind} passed", source_ref=kind,
             )
-        self.assertTrue(governance.evaluate(self.root, "git_commit", session_id="s")["allowed"])
+        with patch.object(governance.stage_docs, "missing_before", return_value=[]):
+            self.assertTrue(governance.evaluate(self.root, "git_commit", session_id="s")["allowed"])
+
+    def test_advisory_codereview_does_not_suggest_manual_pass(self):
+        ctx = context.bind(
+            self.root, session_id="s", task_id="small-fix",
+            task_type="simple_change", spec_system="none", spec_ref=None,
+        )
+        for kind in ("tests", "static_analysis"):
+            evidence.record(
+                self.root, ctx["context_id"], kind=kind, producer="test",
+                result="pass", summary=f"{kind} passed", source_ref=kind,
+            )
+        evidence.record(
+            self.root, ctx["context_id"], kind="semantic_review",
+            producer="hook:codereview-cli", result="warning",
+            summary="CodeReview 已完成建议性审查；有限覆盖且无自动放行结论",
+            source_ref="codereview-output-sha256:abcd1234",
+        )
+
+        with patch.object(governance.stage_docs, "missing_before", return_value=[]):
+            denied = governance.evaluate(self.root, "git_commit", session_id="s")
+
+        self.assertFalse(denied["allowed"])
+        self.assertEqual(denied["envelope"]["code"], "governance_semantic_review_advisory")
+        self.assertEqual(denied["envelope"]["missing"], ["semantic_review"])
+        self.assertIn("可信放行依据", denied["envelope"]["message"])
+        self.assertNotIn("evidence record", denied["envelope"]["fix"])
+
+    def test_commit_denied_when_git_evidence_snapshot_cannot_be_read(self):
+        ctx = context.bind(
+            self.root, session_id="s", task_id="small-fix",
+            task_type="simple_change", spec_system="none", spec_ref=None,
+        )
+        for kind in governance.COMMIT_EVIDENCE:
+            evidence.record(
+                self.root, ctx["context_id"], kind=kind, producer="fixture",
+                result="pass", summary="passed", source_ref=f"run:{kind}",
+            )
+        original_git = evidence._git
+
+        for failing_command in ("diff", "ls-files"):
+            with self.subTest(failing_command=failing_command):
+                def fail_git(root, *args, **kwargs):
+                    if args and args[0] == failing_command:
+                        return subprocess.CompletedProcess(["git", *args], 1, b"", b"index unavailable")
+                    return original_git(root, *args, **kwargs)
+
+                with patch.object(evidence, "_git", side_effect=fail_git):
+                    with patch.object(governance.stage_docs, "missing_before", return_value=[]):
+                        result = governance.evaluate(self.root, "git_commit", session_id="s")
+
+                self.assertFalse(result["allowed"])
+                self.assertEqual(result["envelope"]["code"], "governance_git_state_unavailable")
 
     def test_release_requires_release_evidence_and_completed_children(self):
         parent = context.bind(
@@ -255,7 +403,10 @@ class GovernanceTest(unittest.TestCase):
             task_type="simple_change", spec_system="none", spec_ref=None,
         )
         denied = governance.evaluate(self.root, "release", session_id="s")
-        self.assertEqual(denied["envelope"]["code"], "governance_dependencies_incomplete")
+        self.assertEqual(denied["envelope"]["code"], "governance_stage_required")
+        with patch.object(governance.stage_docs, "missing_before", return_value=[]):
+            denied = governance.evaluate(self.root, "release", session_id="s")
+            self.assertEqual(denied["envelope"]["code"], "governance_dependencies_incomplete")
 
         context.complete(self.root, child["context_id"])
         for kind in (*governance.COMMIT_EVIDENCE, *governance.RELEASE_EVIDENCE):
@@ -263,7 +414,8 @@ class GovernanceTest(unittest.TestCase):
                 self.root, parent["context_id"], kind=kind, producer="test",
                 result="pass", summary=f"{kind} passed", source_ref=kind,
             )
-        self.assertTrue(governance.evaluate(self.root, "release", session_id="s")["allowed"])
+        with patch.object(governance.stage_docs, "missing_before", return_value=[]):
+            self.assertTrue(governance.evaluate(self.root, "release", session_id="s")["allowed"])
 
 
 if __name__ == "__main__":

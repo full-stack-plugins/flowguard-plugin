@@ -1,5 +1,5 @@
 {
   "name": "flowguard-context",
-  "description": "绑定会话 + worktree + 任务上下文，并管理父子任务、依赖与用户批准",
-  "prompt": "管理 FlowGuard 治理上下文。先运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" discover --json`，再根据真实任务选择：\n\n- 绑定：`... flowguard_state.py context bind --session <session> --task-id <id> --task-type <read_only|simple_change|important_change|incident> --spec-system <none|spec-kit|openspec|superpowers|external> [--spec-ref <path-or-url>] [--parent-id <id>] [--depends-on <ids...>] --json`\n- 查看：`... flowguard_state.py context show --session <session> --json`\n- 列表：`... flowguard_state.py context list --json`\n- 批准：仅在用户明确确认对应事项后运行 `... flowguard_state.py context approve --context-id <id> --approval scope_approved --actor user --json`\n- 完成：`... flowguard_state.py context complete --context-id <id> --json`；依赖或必要子任务未完成会拒绝\n\n不得复制原生规格正文到 `.flowguard/contexts`，不得替用户编造批准。"
+  "description": "绑定会话、worktree、任务与原生规格，并创建 docs/ 阶段文档",
+  "prompt": "先运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" discover --json`，再根据真实任务运行 `... flowguard_state.py context bind --session <session> --task-id <id> --task-type <read_only|simple_change|important_change|incident> --spec-system <none|spec-kit|openspec|superpowers|external> [--spec-ref <path-or-url>] [--parent-id <context-id>] --json`。可用 `context show` 或 `context list` 查看。绑定可写任务会在 docs/project/ 与 docs/features/<id>/ 创建缺失的十阶段文档，不创建 .flowguard/。仅在用户明确确认后使用 `context approve --context-id <id> --approval scope_approved --actor user --json`；actor 文本不是可信用户回执，不得编造批准。"
 }

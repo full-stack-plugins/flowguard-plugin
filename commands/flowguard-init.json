@@ -1,5 +1,5 @@
 {
   "name": "flowguard-init",
-  "description": "旧十阶段兼容初始化；新任务先使用 flowguard-discover，不得静默初始化 SDD 工具",
-  "prompt": "在本项目根目录执行 flowguard 初始化：\n\n1. 运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" init --json`\n2. 向用户报告：识别到的技术栈、模块注册表（名称与 src_roots）、生成的目录结构\n3. 运行 `... flowguard_state.py status` 展示流程看板（十阶段全 pending 为正常初始态）\n4. 提示用户下一步：用 `/flowguard-feature new <id> --modules <模块...>` 创建第一个功能\n\n注意：init 幂等，重复执行不会覆盖已有状态。"
+  "description": "只创建 docs/project/ 中的项目级十阶段文档；不创建 .flowguard/",
+  "prompt": "先运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" discover --json` 做只读检查。若用户已要求初始化 FlowGuard 文档且目标仓库明确，运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" init --json`。只创建 docs/project/ 下的 02/07/10；功能文档由 context bind 创建。不得自动执行 specify init、openspec init 或 legacy-init。"
 }

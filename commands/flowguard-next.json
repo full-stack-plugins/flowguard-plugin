@@ -1,5 +1,5 @@
 {
   "name": "flowguard-next",
-  "description": "旧十阶段兼容推进；新任务由智能体推进所选原生 SDD 工具",
-  "prompt": "推进 flowguard 流水线到下一个待做阶段：\n\n1. 运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" next --json`（可用 --feature <id> 指定功能；项目级阶段用 `next --stage <architecture|standards|release>`）\n2. 读取返回的 instructions JSON：\n   - `context` 与 `rules`：项目级约束，必须遵守，**禁止抄进产物正文**\n   - `template`：加载对应产物模板文件作为骨架\n   - `requires`：依赖产物若未就绪，先说明缺什么\n   - `tier2`：列出的执行技能若未安装且用户需要深入能力，给出 install 命令（npx skills add ...）\n3. 按模板与用户输入产出该阶段产物（写回 instructions 指向的产物文件）\n4. 产出完成后运行 `... gate` 自检，并提示用户可执行 /flowguard-advance 进入验收\n\n硬性约束：验收必须由用户发起（/flowguard-advance），agent 不得自行验收。"
+  "description": "由智能体判断十阶段的下一步，不由 Hook 自动推进",
+  "prompt": "运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" stage status --task-id <task-id> --json`，读取 docs/ 中 01—10 状态和原生规格引用。智能体结合用户目标、依赖与现有产物决定当前阶段；读取对应 flowguard-* 阶段技能，补充文档和验证证据。用 `... flowguard_state.py stage advance --task-id <task-id> --stage <01-requirements|...|10-release> --status in_progress --json` 标记开始。不要调用旧 next 命令推进新任务，不得代替用户验收。"
 }

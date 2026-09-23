@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from flowguard_lib import (  # noqa: E402
     context, detect, discovery, evidence, gate, governance, ids, instructions,
-    journal, registry, state, validation,
+    journal, migration, registry, stage_docs, state, validation,
 )
 from flowguard_lib.diag import emit as emit_diag, envelope as mk_env  # noqa: E402
 from templates import artifacts  # noqa: E402
@@ -63,6 +63,16 @@ def _artifact_path(root, rel):
 
 def cmd_init(args):
     root = Path.cwd()
+    created = stage_docs.ensure_project(root)
+    _out({"initialized": True, "root": str(root), "created": created}, args.json)
+
+
+def cmd_legacy_init(args):
+    root = Path.cwd()
+    if not (root / ".flowguard").is_dir():
+        _die(mk_env("ERROR", "legacy_state_required",
+                    "新项目不创建 .flowguard/；legacy-init 仅用于已有旧项目",
+                    "运行 discover/context bind 创建 docs/ 阶段文档；旧项目先运行 migrate --dry-run"))
     project = artifacts.init_project(root)
     journal.append(root, "project", "init", {"modules": list(project["modules"])})
     _out({"initialized": True, "project": project["project"],
@@ -135,6 +145,23 @@ def cmd_governance(args):
         }, args.json)
         return
     _die(result["envelope"], code=2, as_json=args.json)
+
+
+def cmd_stage(args):
+    root = Path.cwd()
+    if args.action == "status":
+        data = stage_docs.snapshot(root, args.task_id)
+    else:
+        data = stage_docs.advance(
+            root, args.task_id, args.stage, args.status,
+            approval_ref=args.approval_ref, reason=args.reason,
+        )
+    _out(data, args.json)
+
+
+def cmd_migrate(args):
+    data = migration.apply(Path.cwd()) if args.apply else migration.preview(Path.cwd())
+    _out(data, args.json)
 
 
 def cmd_status(args):
@@ -390,8 +417,11 @@ def main(argv=None):
     p = Parser(prog="flowguard_state")
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    sp = sub.add_parser("init", help="初始化 .flowguard/ 骨架（幂等）")
+    sp = sub.add_parser("init", help="在 docs/project/ 创建项目级十阶段文档（幂等）")
     sp.set_defaults(fn=cmd_init)
+
+    sp = sub.add_parser("legacy-init", help="仅旧项目兼容：初始化 .flowguard/ 状态")
+    sp.set_defaults(fn=cmd_legacy_init)
 
     sp = sub.add_parser("discover", help="只读发现 Git / SDD / 工具状态，不执行初始化")
     sp.set_defaults(fn=cmd_discover)
@@ -429,6 +459,21 @@ def main(argv=None):
     sp.add_argument("--action", required=True, choices=governance.ACTIONS)
     sp.add_argument("--path")
     sp.set_defaults(fn=cmd_governance)
+
+    sp = sub.add_parser("stage", help="从 docs/ 读取或推进十阶段文档")
+    sp.add_argument("action", choices=["status", "advance"])
+    sp.add_argument("--task-id", required=True)
+    sp.add_argument("--stage", choices=tuple(registry.ARTIFACTS))
+    sp.add_argument("--status", choices=stage_docs.VALID_STATUSES)
+    sp.add_argument("--approval-ref")
+    sp.add_argument("--reason")
+    sp.set_defaults(fn=cmd_stage)
+
+    sp = sub.add_parser("migrate", help="预检或复制旧 .flowguard 产物至 docs/")
+    mode = sp.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--dry-run", action="store_true")
+    mode.add_argument("--apply", action="store_true")
+    sp.set_defaults(fn=cmd_migrate)
 
     sp = sub.add_parser("status", help="流程看板")
     sp.add_argument("--feature")
@@ -474,7 +519,7 @@ def main(argv=None):
     sp.add_argument("--feature")
     sp.set_defaults(fn=cmd_instructions)
 
-    for name in ("init", "discover", "context", "evidence", "governance", "status",
+    for name in ("init", "legacy-init", "discover", "context", "evidence", "governance", "stage", "migrate", "status",
                  "feature", "next", "advance", "override", "gate", "validate", "instructions"):
         sub.choices[name].add_argument("--json", action="store_true")
 
@@ -483,8 +528,9 @@ def main(argv=None):
     _AS_JSON = bool(getattr(args, "json", False))
     try:
         args.fn(args)
-    except (state.StateError, context.ContextError, evidence.EvidenceError) as e:
-        _die(mk_env("ERROR", "state_error", str(e), "检查 .flowguard/ 状态或 journal"))
+    except (state.StateError, context.ContextError, evidence.EvidenceError,
+            stage_docs.StageDocError, migration.MigrationError) as e:
+        _die(mk_env("ERROR", "state_error", str(e), "检查 docs/ 阶段文档、宿主会话缓存或旧 journal"))
 
 
 if __name__ == "__main__":

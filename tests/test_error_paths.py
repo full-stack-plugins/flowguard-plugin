@@ -16,7 +16,8 @@ class ErrorPathTest(unittest.TestCase):
     def setUp(self):
         self.root = Path(tempfile.mkdtemp())
         (self.root / "pom.xml").write_text("<project/>", encoding="utf-8")
-        self.assertEqual(run(self.root, "init", "--json").returncode, 0)
+        (self.root / ".flowguard").mkdir()  # 显式旧项目夹具
+        self.assertEqual(run(self.root, "legacy-init", "--json").returncode, 0)
         self.assertEqual(run(self.root, "feature", "new", "f1", "--modules", "app", "--json").returncode, 0)
 
     def test_unknown_artifact_gets_envelope(self):
@@ -56,11 +57,12 @@ class ErrorPathTest(unittest.TestCase):
 
 
 class HookErrorPathTest(unittest.TestCase):
-    def test_gate_half_valid_json_allows(self):
+    def test_gate_half_valid_write_json_is_denied_inside_git_repo(self):
         p = subprocess.run([sys.executable, str(HOOKS / "flowguard_gate.py")],
                            input=json.dumps({"tool_name": "Write"}),  # 缺 tool_input/cwd
                            capture_output=True, text=True)
-        self.assertEqual(p.returncode, 0)
+        self.assertEqual(p.returncode, 2)
+        self.assertIn("governance_context_required", p.stderr)
         self.assertNotIn("Traceback", p.stderr)
 
     def test_artifact_check_bad_json_allows(self):
