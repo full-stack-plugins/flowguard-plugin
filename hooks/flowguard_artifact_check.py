@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PostToolUse：证据采集/失效 + 旧产物校验与降级（恒 exit 0）。"""
+"""PostToolUse：证据采集与阶段文档失效提示（恒 exit 0）。"""
 import hashlib
 import json
 import os
@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from flowguard_lib import codereview_evidence, context, evidence, journal, stage_docs, state, tool_scope, validation  # noqa: E402
+from flowguard_lib import codereview_evidence, context, evidence, stage_docs, tool_scope  # noqa: E402
 
 # artifact 文件名 → 阶段（用于降级与校验路由）
 ARTIFACT_STAGE = {
@@ -176,20 +176,6 @@ def _parse_artifact(path):
         if len(parts) == 2 and parts[0] == "project":
             stage = ARTIFACT_STAGE.get(Path(parts[1]).stem)
             return ("docs_project", None, stage) if stage else None
-    marker = ".flowguard/"
-    if marker not in p or not p.endswith(".md"):
-        return None
-    rel = p.split(marker, 1)[1]
-    if rel.startswith("features/"):
-        parts = rel.split("/")
-        if len(parts) >= 3 and parts[2] == "artifacts":
-            stem = parts[3][:-3] if parts[3].endswith(".md") else parts[3]
-            stage = ARTIFACT_STAGE.get(stem)
-            return ("feature", parts[1], stage) if stage else None
-    if rel.startswith("project/"):
-        stem = Path(rel).stem
-        stage = ARTIFACT_STAGE.get(stem)
-        return ("project", None, stage) if stage else None
     return None
 
 
@@ -222,50 +208,16 @@ def _check_artifact(cwd, file_path, active, notices):
     info = _parse_artifact(file_path)
     if not info:
         return
-    scope, fid, stage = info
-    if scope.startswith("docs_"):
-        task_id = fid or (active or {}).get("task_id") or "project"
-        try:
-            phase = stage_docs.read(cwd, task_id, next(
-                aid for aid, item in stage_docs.registry.ARTIFACTS.items() if item["stage"] == stage
-            ))
-            if phase["status"] == "invalidated":
-                _notice(notices, f"[flowguard] 阶段文档已失效: {phase['path']}；请复核后重新申请验收")
-        except Exception as error:
-            _notice(notices, f"[flowguard] 阶段文档待修复: {error}")
-        return
+    _scope, fid, stage = info
+    task_id = fid or (active or {}).get("task_id") or "project"
     try:
-        if scope == "feature":
-            owner = state.load_feature(cwd, fid)
-            jscope = f"feature:{fid}"
-        else:
-            owner = state.load_project(cwd)
-            jscope = "project"
-    except Exception:
-        return
-
-    degraded = state.degrade_from(owner, stage)
-    if degraded:
-        if scope == "feature":
-            state.save_feature(cwd, owner)
-        else:
-            state.save_project(cwd, owner)
-        journal.append(cwd, jscope, "artifact_rework_degrade",
-                       {"artifact": Path(file_path).name, "degraded": degraded})
-        _notice(notices, f"[flowguard] 产物回改，已降级阶段: {', '.join(degraded)}")
-
-    try:
-        text = (cwd / file_path).read_text(encoding="utf-8")
-        issues = []
-        if stage == "requirements" and fid:
-            issues = validation.validate_requirements(text, fid)
-        elif stage == "review" and fid:
-            issues = validation.validate_review(text)
-        for issue in issues:
-            if issue["level"] in ("ERROR", "WARNING"):
-                _notice(notices, f"[flowguard] {issue['level']}: {issue['message']} → {issue['fix']}")
-    except Exception:
-        pass
+        phase = stage_docs.read(cwd, task_id, next(
+            aid for aid, item in stage_docs.registry.ARTIFACTS.items() if item["stage"] == stage
+        ))
+        if phase["status"] == "invalidated":
+            _notice(notices, f"[flowguard] 阶段文档已失效: {phase['path']}；请复核后重新申请验收")
+    except Exception as error:
+        _notice(notices, f"[flowguard] 阶段文档待修复: {error}")
 
 
 def main():

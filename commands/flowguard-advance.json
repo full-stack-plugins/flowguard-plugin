@@ -1,5 +1,0 @@
-{
-  "name": "flowguard-advance",
-  "description": "按 docs/ 阶段文档显式推进；验收必须有真实用户确认",
-  "prompt": "先运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" stage status --task-id <task-id> --json`。展示指定阶段文档的完成内容、机械校验结果、测试与审查证据、尚存风险；明确请求用户确认。用户未说「验收通过/确认」时不得把阶段推进为 accepted。收到明确确认后，运行 `... flowguard_state.py stage advance --task-id <task-id> --stage <01-requirements|...|10-release> --status accepted --approval-ref <真实批准依据> --json`，再读 stage status 核对。不要使用旧 advance 命令写 .flowguard 状态；仅凭 --approval-ref 字符串不足以证明不可伪造的用户回执。"
-}

@@ -63,21 +63,5 @@ class TemplatesTest(unittest.TestCase):
         self.assertIn("- REQ:", text)
         self.assertIn("- 测试文件:", text)
 
-class InitProjectTest(unittest.TestCase):
-    def test_init_creates_skeleton(self):
-        root = Path(tempfile.mkdtemp())
-        touch(root / "pom.xml")
-        proj = detect.init_project(root)
-        self.assertTrue((root / ".flowguard" / "project.json").exists())
-        self.assertTrue((root / ".flowguard" / "config.yaml").exists())
-        self.assertTrue((root / ".flowguard" / "project" / "02-architecture.md").exists())
-        self.assertTrue((root / ".flowguard" / "project" / "07-standards.md").exists())
-        self.assertTrue((root / ".flowguard" / "project" / "10-release.md").exists())
-        self.assertEqual(proj["modules"]["app"]["stack"], "java-spring")
-        self.assertIsNone(proj["current_feature"])
-        # 幂等
-        proj2 = detect.init_project(root)
-        self.assertEqual(proj2, proj)
-
 if __name__ == "__main__":
     unittest.main()

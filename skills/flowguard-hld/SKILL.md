@@ -2,7 +2,7 @@
 name: flowguard-hld
 license: Apache-2.0
 description: 概要设计阶段（薄）。当用户要划分模块/服务、描述交互与数据流时使用。不要用它写类级明细（flowguard-lld）。
-compatibility: Python 3 标准库；十阶段文档位于 docs/，无需项目 .flowguard/ 目录。
+compatibility: Python 3 标准库；十阶段文档位于 docs/。
 ---
 
 # flowguard-hld —— 产出概要设计 05-hld.md：模块/服务划分与交互。

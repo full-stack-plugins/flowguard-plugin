@@ -27,7 +27,7 @@ SKILL_SPECS = [
         "name": "flowguard-requirements", "scope": "feature", "stage": "requirements", "artifact": "01-requirements",
         "goal": "产出功能需求产物 01-requirements.md：用户故事 + <feature>/REQ-n + 可验收标准。",
         "description": ("需求分析阶段的编排技能。当用户要写需求/用户故事/功能规格、或把模糊想法变成可验收需求时使用；"
-                        "以 current_feature 为工作对象，产出 Requirement/Scenario 结构化需求。"
+                        "以已绑定的 task-id 为工作对象，产出 Requirement/Scenario 结构化需求。"
                         "不要用它做架构选型或写测试用例（后续阶段职责）。"),
         "routes": [
             "ddd-domain-designer → 领域建模深水区（npx skills add full-stack-skills/ddd-skills --skill ddd-domain-designer）",
@@ -160,7 +160,7 @@ compatibility: Python 3 标准库；Git 项目无需预先初始化 FlowGuard。
 
 十阶段是强制流程骨架，不是由 Hook 自动推进的固定脚本。智能体判断任务及下一步，Spec Kit/OpenSpec 管正式规格，Superpowers 管工程方法；FlowGuard 校验 `docs/` 中的阶段产物、批准和证据，并阻止绕过。
 
-项目级文档位于 `docs/project/`（02、07、10）；功能及独立子功能位于 `docs/features/<task-id>/`（01、03、04、05、06、08、09）。新项目不创建 `.flowguard/`；原生规格只在阶段文档中引用，不复制正文。
+项目级文档位于 `docs/project/`（02、07、10）；功能及独立子功能位于 `docs/features/<task-id>/`（01、03、04、05、06、08、09）。原生规格只在阶段文档中引用，不复制正文。
 
 ## 30 秒开始
 
@@ -216,9 +216,6 @@ test -f "${{FLOWGUARD_PLUGIN_ROOT:?}}/scripts/flowguard_state.py" || exit 1
 - CodeReview：基于正式规格和代码上下文输出语义风险，作为 `semantic_review` 证据。
 - 机器 PASS 不自动成为用户验收；代码变化使可过期证据失效。
 
-## 旧项目迁移
-
-发现旧 `.flowguard/` 时先运行 `migrate --dry-run`，经用户确认再 `migrate --apply`，核对 `docs/` 后才考虑移走旧数据；冲突时停止，不能覆盖现有文档。`legacy-init` 仅用于旧流程兼容，新项目不得使用。
 """
 
 
@@ -243,7 +240,7 @@ test -f "${{FLOWGUARD_PLUGIN_ROOT:?}}/scripts/flowguard_state.py" || exit 1
 name: {name}
 license: Apache-2.0
 description: {spec['description']}
-compatibility: Python 3 标准库；十阶段文档位于 docs/，无需项目 .flowguard/ 目录。
+compatibility: Python 3 标准库；十阶段文档位于 docs/。
 ---
 
 # {name} —— {spec['goal']}

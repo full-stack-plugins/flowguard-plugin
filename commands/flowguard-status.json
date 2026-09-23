@@ -1,5 +1,0 @@
-{
-  "name": "flowguard-status",
-  "description": "读取 docs/ 十阶段项目与功能状态",
-  "prompt": "运行 `python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/flowguard_state.py\" stage status --task-id <task-id> --json`。展示 01—10 阶段状态、文档路径、失效原因和下一步；项目级 02/07/10 从 docs/project/ 读取，功能级七阶段从 docs/features/<task-id>/ 读取。不要用旧 status/current_feature 作为新任务的唯一事实源。"
-}

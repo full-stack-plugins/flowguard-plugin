@@ -91,16 +91,16 @@ python3 scripts/flowguard_state.py governance \
 
 协议见 [hooks/__protocol__.md](hooks/__protocol__.md)。
 
-## 文档位置与旧项目迁移
+## 文档位置
 
-项目级 02/07/10 放在 `docs/project/`，功能级 01/03/04/05/06/08/09 放在 `docs/features/<task-id>/`。新项目不创建 `.flowguard/`；会话缓存保存在宿主状态目录。旧项目先运行 `migrate --dry-run`，确认无冲突后再 `migrate --apply`，核对完成前保留旧数据。迁移中途失败时，已创建文档保留并在错误中列出，需人工核对；不会为了回滚而删除可能已被他人修改的文件。`legacy-init` 仅供旧命令兼容。
+项目级 02/07/10 放在 `docs/project/`，功能级 01/03/04/05/06/08/09 放在 `docs/features/<task-id>/`。会话缓存保存在仓库外的宿主状态目录。旧 `.flowguard/` 布局及其迁移命令已在 v0.4.0 下线；本仓 `docs/legacy-flowguard/` 仅是只读历史归档。
 
 ## 文档
 
 - [FlowGuard-Architecture.zh_CN.md](docs/FlowGuard-Architecture.zh_CN.md) — 当前架构、运行流、可信边界和风险
 - [十阶段 docs 治理规格](docs/superpowers/specs/2026-09-23-flowguard-docs-ten-stage-governance.md)
 - [实施计划](docs/superpowers/plans/2026-09-23-flowguard-agent-driven-sdd-governance.md)
-- [旧产物兼容契约](docs/FLOWGUARD_ARTIFACT_SPEC.md)
+- [产物格式契约](docs/FLOWGUARD_ARTIFACT_SPEC.md)
 - [路线图](docs/roadmap.md)
 
 ## 验证

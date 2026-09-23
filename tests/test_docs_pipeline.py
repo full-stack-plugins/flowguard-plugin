@@ -67,7 +67,7 @@ class DocsPipelineTest(unittest.TestCase):
             with self.assertRaises(OSError):
                 self.bind()
         self.assertFalse(target.exists())
-        self.assertEqual(list(target.parent.glob(".flowguard-*")), [])
+        self.assertEqual(list(target.parent.glob(".fg-atomic-*")), [])
         self.assertIsNone(context.active(self.root, "s"))
 
     def test_project_init_creation_failure_does_not_leave_partial_document(self):
@@ -77,7 +77,7 @@ class DocsPipelineTest(unittest.TestCase):
             with self.assertRaises(OSError):
                 stage_docs.ensure_project(self.root)
         self.assertFalse(target.exists())
-        self.assertEqual(list(target.parent.glob(".flowguard-*")), [])
+        self.assertEqual(list(target.parent.glob(".fg-atomic-*")), [])
 
     def test_project_init_cannot_create_docs_while_state_lock_is_held(self):
         from flowguard_lib import state

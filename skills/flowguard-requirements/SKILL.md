@@ -1,8 +1,8 @@
 ---
 name: flowguard-requirements
 license: Apache-2.0
-description: 需求分析阶段的编排技能。当用户要写需求/用户故事/功能规格、或把模糊想法变成可验收需求时使用；以 current_feature 为工作对象，产出 Requirement/Scenario 结构化需求。不要用它做架构选型或写测试用例（后续阶段职责）。
-compatibility: Python 3 标准库；十阶段文档位于 docs/，无需项目 .flowguard/ 目录。
+description: 需求分析阶段的编排技能。当用户要写需求/用户故事/功能规格、或把模糊想法变成可验收需求时使用；以已绑定的 task-id 为工作对象，产出 Requirement/Scenario 结构化需求。不要用它做架构选型或写测试用例（后续阶段职责）。
+compatibility: Python 3 标准库；十阶段文档位于 docs/。
 ---
 
 # flowguard-requirements —— 产出功能需求产物 01-requirements.md：用户故事 + <feature>/REQ-n + 可验收标准。

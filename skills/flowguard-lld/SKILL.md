@@ -2,7 +2,7 @@
 name: flowguard-lld
 license: Apache-2.0
 description: 详细设计阶段（薄）。当用户要定类职责、表结构、接口字段时使用。不要用它重复概要设计的模块划分。
-compatibility: Python 3 标准库；十阶段文档位于 docs/，无需项目 .flowguard/ 目录。
+compatibility: Python 3 标准库；十阶段文档位于 docs/。
 ---
 
 # flowguard-lld —— 产出详细设计 06-lld.md：类/表/接口明细与异常边界。
