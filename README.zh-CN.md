@@ -46,12 +46,20 @@ flowchart LR
 # 2. 智能体分类后绑定本次任务
 /flowguard-context
 
-# 3. 实施过程中记录真实证据
+# 3. 创建项目级阶段文档 02/07/10
+/flowguard-init
+
+# 4. 读取与推进 docs/ 阶段文档
+/flowguard-stage
+
+# 5. 实施过程中记录真实证据
 /flowguard-evidence
 
-# 4. 写码、提交或发布前复核
+# 6. 写码、提交或发布前复核
 /flowguard-governance
 ```
+
+CLI 另提供 `validate`（产物内容、追溯矩阵与模块栈覆盖检查）。
 
 Kimi 将同源命令注册为带命名空间的 Markdown 命令，例如 `/flowguard:flowguard-discover`。`kimi-commands/` 由 `commands/*.json` 机械生成；修改 JSON 后运行 `python3 scripts/generate_kimi_commands.py --write`。若 Kimi Shell 未提供 `KIMI_PLUGIN_ROOT`，先通过 `/plugins info flowguard` 确认已启用插件的安装目录，再运行其自带 CLI。插件仍由 `full-stack-plugins` 统一登记与发布管理，源码仓库独立维护。
 

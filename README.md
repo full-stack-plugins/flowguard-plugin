@@ -42,9 +42,13 @@ The ten stages are a verifiable process skeleton, not a Hook-driven script. Read
 ```bash
 /flowguard-discover    # read-only; never installs or initializes tools
 /flowguard-context     # classify and bind this session/worktree/task
+/flowguard-init        # create project-level stage docs 02/07/10
+/flowguard-stage       # read and advance docs/ stage documents
 /flowguard-evidence    # record real verification evidence
 /flowguard-governance  # check code-write, commit, or release readiness
 ```
+
+The CLI additionally provides `validate` (artifact content, traceability matrix and module-stack coverage checks).
 
 Kimi registers the same command prompts as namespaced Markdown commands, for example `/flowguard:flowguard-discover`. The Markdown files in `kimi-commands/` are generated from `commands/*.json`; regenerate with `python3 scripts/generate_kimi_commands.py --write` after changing a source command. Kimi Shell may not expose `KIMI_PLUGIN_ROOT`; in that case, use `/plugins info flowguard` to locate the enabled plugin before running its bundled CLI. The plugin remains centrally cataloged in `full-stack-plugins`; this source repository is maintained separately.
 

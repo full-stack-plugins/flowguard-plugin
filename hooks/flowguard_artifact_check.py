@@ -11,15 +11,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from flowguard_lib import codereview_evidence, context, evidence, stage_docs, tool_scope  # noqa: E402
+from flowguard_lib import codereview_evidence, context, evidence, registry, stage_docs, tool_scope  # noqa: E402
 
-# artifact 文件名 → 阶段（用于降级与校验路由）
-ARTIFACT_STAGE = {
-    "01-requirements": "requirements", "02-architecture": "architecture",
-    "03-solution": "solution", "04-testcases": "testcases",
-    "05-hld": "hld", "06-lld": "lld", "07-standards": "standards",
-    "08-review": "review", "09-docs": "docs", "10-release": "release",
-}
+# artifact 文件名 → 阶段（失效提示路由；映射单源 registry.ARTIFACTS）
+ARTIFACT_STAGE = {aid: spec["stage"] for aid, spec in registry.ARTIFACTS.items()}
 CODEGUARD_MCP_TOOLS = ("mcp__codeguard__check_code_style", "mcp__codeguard__auto_fix")
 
 

@@ -234,6 +234,98 @@ def validate_review(text):
     return issues
 
 
+def known_task_ids(root):
+    """docs/features/ 下的 kebab 任务目录即已知功能清单。"""
+    base = Path(root) / "docs" / "features"
+    if not base.is_dir():
+        return []
+    return sorted(p.name for p in base.iterdir()
+                  if p.is_dir() and ids.is_kebab(p.name))
+
+
+def _section(text, start_re, end_re):
+    """截取 start_re 标题到 end_re 标题（不含）之间的正文。"""
+    out, active = [], False
+    for ln in text.splitlines():
+        if not active and re.match(start_re, ln):
+            active = True
+            continue
+        if active and re.match(end_re, ln):
+            break
+        if active:
+            out.append(ln)
+    return "\n".join(out)
+
+
+def validate_architecture(text):
+    """每条非占位 ADR 条目须带 `feature: <来源>` 与 `状态: proposed|accepted`（追加式格式契约）。
+
+    含 `<占位符>`/`{{...}}` 的条目视为模板示例，不参与机械校验。
+    """
+    lines = text.splitlines()
+    masked = _mask_code_fences(lines)
+    issues = []
+    for ln, hide in zip(lines, masked):
+        if hide or not re.match(r"^\s*-\s*ADR-", ln):
+            continue
+        if "<" in ln or "{{" in ln:
+            continue
+        if not re.search(r"feature:\s*\S+", ln):
+            issues.append(_issue("ERROR", "02-architecture.md",
+                                 f"ADR 条目缺 feature 来源标注: {ln.strip()!r}",
+                                 "追加式条目须带 `feature: <来源功能>`（禁止改写既有条目）"))
+        if not re.search(r"状态:\s*(proposed|accepted)", ln):
+            issues.append(_issue("ERROR", "02-architecture.md",
+                                 f"ADR 条目缺合法状态: {ln.strip()!r}",
+                                 "状态须为 proposed 或 accepted"))
+    return issues
+
+
+def validate_standards(text, modules):
+    """已填规范集（2. 规范集节出现非占位条目）须覆盖全部已注册模块的栈。
+
+    纯模板（规范集节全为占位示例）不参与机械校验；无栈模块（无法判定技术栈）跳过。
+    """
+    issues = []
+    body = _section(text, r"^##\s*2\.", r"^##\s*3\.")
+    headings = [ln.lower() for ln in body.splitlines()
+                if re.match(r"^###\s+", ln) and "<" not in ln and "{{" not in ln]
+    if not headings:
+        return issues
+    for name, mod in sorted((modules or {}).items()):
+        stack = (mod or {}).get("stack")
+        if not stack:
+            continue
+        tokens = {name.lower(), str(stack).lower()}
+        tokens.update(t for t in str(stack).lower().replace("_", "-").split("-") if len(t) >= 3)
+        if not any(tok in h for h in headings for tok in tokens):
+            issues.append(_issue("ERROR", "07-standards.md",
+                                 f"规范集未覆盖模块 {name}（技术栈 {stack}）",
+                                 "按模块栈补充 2.1 规范条目（覆盖所有已注册模块的栈）"))
+    return issues
+
+
+def validate_release(text, task_ids):
+    """发布内容表引用的功能须是已知 task-id；占位符行视为模板示例跳过。"""
+    issues = []
+    scope = _section(text, r"^##\s*3\.", r"^##\s*4\.")
+    known = set(task_ids)
+    for ln in scope.splitlines():
+        if "<" in ln or "{{" in ln:
+            continue
+        m = re.match(r"^\|\s*([^|]+?)\s*\|", ln)
+        if not m:
+            continue
+        cell = m.group(1).strip()
+        if not cell or set(cell) <= set(":- ") or cell.startswith("功能"):
+            continue
+        if cell not in known:
+            issues.append(_issue("ERROR", "10-release.md",
+                                 f"发布内容引用未知功能: {cell}",
+                                 "功能须是已存在的 docs/features/<task-id>"))
+    return issues
+
+
 def missing_tier2(refs, root=None):
     """refs: (skill, pkg, install_cmd)；已安装判定见 _installed。缺失产出 WARNING。"""
     out = []
