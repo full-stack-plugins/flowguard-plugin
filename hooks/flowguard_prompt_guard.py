@@ -26,7 +26,7 @@ def main():
     except Exception as error:
         active = None
         print(f"[flowguard] WARNING: 上下文恢复失败，按未绑定处理: {error}", file=sys.stderr)
-    print("[flowguard] 请重新判断任务类型、目标仓库、范围变化与规格事实源；不要仅凭本 Hook 推断语义。")
+    print("[flowguard] 请重新判断任务类型、目标仓库、范围变化与规格事实源；由智能体推进 docs/ 十阶段，不要仅凭本 Hook 推断语义。")
     if active:
         print(
             f"[flowguard] 已绑定 {active['task_id']}({active['task_type']})；"

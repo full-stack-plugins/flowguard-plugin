@@ -1,16 +1,31 @@
-import json, pathlib, re, unittest
+import json, pathlib, re, sys, unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 CMD = ROOT / "commands"
 CLI_SRC = (ROOT / "scripts" / "flowguard_state.py").read_text(encoding="utf-8")
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from generate_kimi_commands import render_command  # noqa: E402
 
 EXPECTED = {
     "flowguard-discover", "flowguard-context", "flowguard-evidence", "flowguard-governance",
     "flowguard-init", "flowguard-feature", "flowguard-status", "flowguard-next",
-    "flowguard-advance", "flowguard-gate", "flowguard-override",
+    "flowguard-advance", "flowguard-gate", "flowguard-override", "flowguard-stage",
 }
 
 class CommandsTest(unittest.TestCase):
+    def test_kimi_markdown_commands_mirror_json_source(self):
+        manifest = json.loads((ROOT / "kimi.plugin.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["commands"], "./kimi-commands/")
+        files = {p.stem for p in (ROOT / "kimi-commands").glob("*.md")}
+        self.assertEqual(files, EXPECTED)
+        for source in CMD.glob("flowguard-*.json"):
+            data = json.loads(source.read_text(encoding="utf-8"))
+            rendered = (ROOT / "kimi-commands" / (source.stem + ".md")).read_text(encoding="utf-8")
+            self.assertEqual(rendered, render_command(data), source.name)
+            self.assertNotIn("${CLAUDE_PLUGIN_ROOT}", rendered)
+            self.assertIn("${KIMI_PLUGIN_ROOT}", rendered)
+
     def test_all_commands_exist_with_schema(self):
         files = {p.stem for p in CMD.glob("flowguard-*.json")}
         self.assertEqual(files, EXPECTED)

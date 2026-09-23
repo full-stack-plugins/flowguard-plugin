@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from flowguard_lib import context, discovery, state  # noqa: E402
+from flowguard_lib import context, discovery, stage_docs, state  # noqa: E402
 
 FEATURE_STAGES = ("requirements", "solution", "testcases", "hld", "lld", "review", "docs")
 
@@ -44,8 +44,27 @@ def main():
                 f"[flowguard] 当前上下文={active['task_id']}({active['task_type']}) "
                 f"| source={active['spec_system']}:{active.get('spec_ref') or '-'}"
             )
+            if active["task_type"] != "read_only":
+                try:
+                    missing = stage_docs.missing_before(cwd, active["task_id"], "release")
+                    lines.append(f"[flowguard] 十阶段 docs 状态: {'下一步 ' + missing[0] if missing else '全部满足'}")
+                except stage_docs.StageDocError as error:
+                    lines.append(f"[flowguard] 十阶段 docs 状态不可读: {error}")
         else:
             lines.append("[flowguard] 当前上下文=未绑定 | 下一步: flowguard_state.py context bind ...")
+            recovered = stage_docs.recoverable(cwd)
+            if recovered["project"]:
+                stages = ", ".join(f"{stage}={status}" for stage, status in recovered["project"].items())
+                lines.append(f"[flowguard] 项目阶段: {stages}")
+            for task in recovered["tasks"]:
+                if task.get("error"):
+                    lines.append(f"[flowguard] 可恢复任务 {task['task_id']}: 待修复 {task['error']}")
+                else:
+                    lines.append(
+                        f"[flowguard] 可恢复任务 {task['task_id']} "
+                        f"| parent={task['parent_task_id'] or '-'} "
+                        f"| 下一步={task['next_stage'] or '全部满足'}"
+                    )
     try:
         project = state.load_project(cwd)
     except Exception:

@@ -9,7 +9,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from . import discovery, state
+from . import discovery, runtime, state
 
 TASK_TYPES = ("read_only", "simple_change", "important_change", "incident")
 SPEC_SYSTEMS = ("none", "spec-kit", "openspec", "superpowers", "external")
@@ -24,7 +24,7 @@ def _now():
 
 
 def _dir(root, *, create=False):
-    path = Path(root) / ".flowguard" / "contexts"
+    path = runtime.repository_state_dir(root, create=create) / "contexts"
     if create:
         path.mkdir(parents=True, exist_ok=True)
     return path
@@ -93,7 +93,9 @@ def _validate_spec_ref(root, spec_system, spec_ref):
         return spec_ref
     target = (Path(root) / spec_ref).resolve()
     root_path = Path(root).resolve()
-    if root_path not in target.parents and target != root_path:
+    if target == root_path:
+        raise ContextError("规格引用不能是仓库根目录")
+    if root_path not in target.parents:
         raise ContextError("spec_ref 必须位于目标仓库内，外部引用请使用 URL")
     if not target.exists():
         raise ContextError(f"规格引用不存在: {spec_ref}")
@@ -185,6 +187,11 @@ def _bind_unlocked(root, *, session_id, task_id, task_type, spec_system, spec_re
         "updated_at": now,
     }
     _assert_acyclic(root, data)
+
+    from . import stage_docs
+    parent_task_id = load(root, parent_id)["task_id"] if parent_id else None
+    if task_type != "read_only":
+        stage_docs.ensure(root, data, parent_task_id=parent_task_id)
 
     index = _index(root)
     active_key = _key(session_id, worktree_id)

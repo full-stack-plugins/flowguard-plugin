@@ -1,7 +1,6 @@
-"""journal-restore 验收用例（TC-1~TC-5 ↔ journal-restore/REQ-1~3）。
+"""历史验收夹具：旧 .flowguard/journal 状态重建 TC-1~TC-5。
 
-TDD 先行：测试文件先于实现创建（执行证据最小版 = 文件存在）。
-实现落地后移除 skip。
+当前流程以 docs/ 为事实源；此文件仅保留原需求追溯，不属于活动测试集。
 """
 import json, shutil, subprocess, sys, tempfile, unittest
 from pathlib import Path
@@ -22,7 +21,8 @@ def run(root, *argv):
 
 def seed_project(root):
     (root / "pom.xml").write_text("<project/>", encoding="utf-8")
-    assert run(root, "init", "--json").returncode == 0
+    (root / ".flowguard").mkdir()  # 显式旧项目夹具
+    assert run(root, "legacy-init", "--json").returncode == 0
     assert run(root, "feature", "new", "f1", "--modules", "app", "--json").returncode == 0
     assert run(root, "next", "--json").returncode == 0
 

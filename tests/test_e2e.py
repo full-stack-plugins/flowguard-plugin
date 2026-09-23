@@ -30,6 +30,7 @@ class EndToEndTest(unittest.TestCase):
     def setUp(self):
         self.root = Path(tempfile.mkdtemp())
         shutil.copytree(FIXTURE, self.root, dirs_exist_ok=True)
+        (self.root / ".flowguard").mkdir()  # 显式旧项目夹具
 
     def cli(self, *argv):
         p = subprocess.run([sys.executable, str(CLI), *argv], cwd=self.root,
@@ -42,7 +43,7 @@ class EndToEndTest(unittest.TestCase):
 
     def test_two_features_two_modules_full_walk(self):
         # init：探测双模块
-        r = self.cli("init", "--json")
+        r = self.cli("legacy-init", "--json")
         self.assertEqual(r.returncode, 0, r.stderr)
         init = json.loads(r.stdout)
         self.assertEqual(sorted(init["modules"]), ["order", "web"])

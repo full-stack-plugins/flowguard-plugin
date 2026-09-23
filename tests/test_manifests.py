@@ -33,7 +33,14 @@ class ManifestContractTest(unittest.TestCase):
     def test_kimi_inlines_hooks(self):
         m = self._load("kimi.plugin.json")
         events = {h["event"] for h in m["hooks"]}
-        self.assertEqual(events, {"SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "Stop"})
+        self.assertEqual(events, {"SessionStart", "UserPromptSubmit", "PreToolUse",
+                                  "PostToolUse", "PostToolUseFailure", "Stop"})
+
+    def test_kimi_session_start_loads_the_governance_skill(self):
+        m = self._load("kimi.plugin.json")
+        skill_name = m["sessionStart"]["skill"]
+        self.assertEqual(skill_name, "flowguard")
+        self.assertTrue((ROOT / m["skills"] / skill_name / "SKILL.md").is_file())
 
     def test_claude_hooks_cover_agent_governance_loop(self):
         hooks = self._load("hooks/hooks.json")["hooks"]

@@ -51,7 +51,8 @@ class GovernanceCliTest(unittest.TestCase):
         )
         self.assertEqual(approved.returncode, 0, approved.stderr)
         allowed = run(self.root, "governance", "--session", "s", "--action", "code_write", "--json")
-        self.assertEqual(allowed.returncode, 0, allowed.stdout + allowed.stderr)
+        self.assertEqual(allowed.returncode, 2)
+        self.assertEqual(json.loads(allowed.stdout)["code"], "governance_stage_required")
 
     def test_evidence_record_and_list(self):
         bound = run(
@@ -70,6 +71,37 @@ class GovernanceCliTest(unittest.TestCase):
         )
         self.assertEqual(listed.returncode, 0, listed.stderr)
         self.assertEqual(json.loads(listed.stdout)["valid_kinds"], ["tests"])
+
+    def test_stage_command_reads_and_advances_docs_without_private_directory(self):
+        bound = run(
+            self.root, "context", "bind", "--session", "s", "--task-id", "fix",
+            "--task-type", "simple_change", "--spec-system", "none", "--json",
+        )
+        self.assertEqual(bound.returncode, 0, bound.stderr)
+        status = run(self.root, "stage", "status", "--task-id", "fix", "--json")
+        self.assertEqual(status.returncode, 0, status.stderr)
+        self.assertEqual(len(json.loads(status.stdout)["stages"]), 10)
+        started = run(
+            self.root, "stage", "advance", "--task-id", "fix",
+            "--stage", "01-requirements", "--status", "in_progress", "--json",
+        )
+        self.assertEqual(started.returncode, 0, started.stderr)
+        self.assertEqual(json.loads(started.stdout)["status"], "in_progress")
+        self.assertFalse((self.root / ".flowguard").exists())
+
+    def test_legacy_init_cannot_create_private_directory_in_new_project(self):
+        result = run(self.root, "legacy-init", "--json")
+        self.assertEqual(result.returncode, 3)
+        self.assertEqual(json.loads(result.stdout)["code"], "legacy_state_required")
+        self.assertFalse((self.root / ".flowguard").exists())
+
+    def test_init_creates_only_project_stage_documents(self):
+        result = run(self.root, "init", "--json")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((self.root / "docs/project/02-architecture.md").is_file())
+        self.assertTrue((self.root / "docs/project/07-standards.md").is_file())
+        self.assertTrue((self.root / "docs/project/10-release.md").is_file())
+        self.assertFalse((self.root / ".flowguard").exists())
 
 
 if __name__ == "__main__":
