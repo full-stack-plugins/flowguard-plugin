@@ -1,6 +1,6 @@
 {
   "name": "flowguard",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "interface": {
     "displayName": "研发流程门禁",
     "shortDescription": "智能体 SDD 治理：原生规格、证据与提交门禁",

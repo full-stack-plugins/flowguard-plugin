@@ -5,7 +5,7 @@
     "en": "研发流程门禁",
     "zh-CN": "研发流程门禁"
   },
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Agent-driven SDD governance for Codex, ZCode, Kimi and Claude: native Spec Kit/OpenSpec/Superpowers discovery, session-worktree task binding, evidence freshness and deterministic code/commit/release gates.",
   "description_i18n": {
     "en": "Agent-driven SDD governance with native specification discovery, task-context binding, evidence freshness, and deterministic commit/release gates.",
