@@ -1,0 +1,50 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "flowguard",
+  "version": "0.4.1",
+  "description": "Agent-driven SDD governance for Codex, ZCode, Kimi and Claude: native Spec Kit/OpenSpec/Superpowers discovery, session-worktree task binding, evidence freshness and deterministic code/commit/release gates.",
+  "author": {
+    "name": "Full Stack Skills / PartMe.AI",
+    "url": "https://github.com/full-stack-plugins/flowguard-plugin"
+  },
+  "homepage": "https://github.com/full-stack-plugins/flowguard-plugin",
+  "repository": "https://github.com/full-stack-plugins/flowguard-plugin",
+  "license": "Apache-2.0",
+  "keywords": [
+    "sdd",
+    "agent-governance",
+    "workflow",
+    "quality-gates",
+    "code-review"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "研发流程门禁",
+        "shortDescription": "智能体 SDD 治理：原生规格、证据与提交门禁",
+        "longDescription": "智能体根据任务语义选择并推进 Spec Kit、OpenSpec 或 Superpowers；FlowGuard 绑定会话、worktree 与变更，校验用户批准、父子依赖以及 CodeGuard、CodeReview 和测试证据，在写码、Git 提交和发布前执行确定性门禁。",
+        "developerName": "Full Stack Skills / PartMe.AI",
+        "category": "developer-tools",
+        "capabilities": [
+          "workflow-orchestration",
+          "quality-gates",
+          "spec-driven-development",
+          "evidence-governance"
+        ],
+        "brandColor": "#0F766E",
+        "logo": "./assets/official-logo.png",
+        "privacyPolicyURL": "https://github.com/full-stack-plugins/flowguard-plugin/blob/main/PRIVACY.md",
+        "termsOfServiceURL": "https://github.com/full-stack-plugins/flowguard-plugin/blob/main/TERMS.md",
+        "defaultPrompt": [
+          "发现当前 Git 项目的 SDD 状态并告诉我下一步",
+          "为这个变更绑定 FlowGuard 上下文并检查写码条件",
+          "检查当前变更是否具备 Git 提交所需的有效证据"
+        ],
+        "logoDark": "./assets/official-logo.png"
+      }
+    },
+    "ai.nanoco.nanoclaw": {
+      "agentName": "研发流程门禁"
+    }
+  }
+}
