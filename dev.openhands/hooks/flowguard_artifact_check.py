@@ -8,7 +8,7 @@ import shlex
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = next((c for c in Path(__file__).resolve().parents if (c / "plugin.json").is_file()), Path(__file__).resolve().parents[1])
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from flowguard_lib import codereview_evidence, context, evidence, registry, stage_docs, tool_scope  # noqa: E402
