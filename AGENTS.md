@@ -4,7 +4,7 @@
 
 ## 全局约束（照 spec 决策表）
 
-- 命名：仓库 `flowguard-plugin`、name `flowguard`、displayName「研发流程门禁」、i18n en "FlowGuard: R&D Process Gate"、命令前缀 `/flowguard-*`。十阶段产物只写 `docs/project/` 与 `docs/features/<task-id>/`；仓库内不得出现 `.flowguard/`。
+- 命名：仓库 `flowguard-plugin`、name `flowguard`、displayName "FlowGuard"、i18n en "FlowGuard"、命令前缀 `/flowguard-*`。十阶段产物只写 `docs/project/` 与 `docs/features/<task-id>/`；仓库内不得出现 `.flowguard/`。
 - Python 仅标准库；测试用 `python3 -m unittest discover -s tests`（不是 pytest）。
 - SKILL.md ≤ 500 行；frontmatter 必含 `name`（kebab，与目录同名）/ `license: Apache-2.0` / `description`（含触发词与负面边界）/ `compatibility`。
 - 跨技能引用只用「技能名 + `npx skills add <org>/<pkg> --skill <name>`」，禁止 `../` 相对路径指向其它技能。
