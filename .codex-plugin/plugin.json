@@ -1,6 +1,6 @@
 {
   "name": "flowguard",
-  "version": "0.4.1+codex.20260924",
+  "version": "0.4.2+codex.20261003",
   "author": {
     "name": "Full Stack Skills / PartMe.AI",
     "url": "https://github.com/full-stack-plugins/flowguard-plugin"
@@ -17,7 +17,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "研发流程门禁",
+    "displayName": "FlowGuard",
     "shortDescription": "智能体 SDD 治理：原生规格、证据与提交门禁",
     "longDescription": "智能体根据任务语义选择并推进 Spec Kit、OpenSpec 或 Superpowers；FlowGuard 绑定会话、worktree 与变更，校验用户批准、父子依赖以及 CodeGuard、CodeReview 和测试证据，在写码、Git 提交和发布前执行确定性门禁。",
     "developerName": "Full Stack Skills / PartMe.AI",

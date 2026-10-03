@@ -9,9 +9,9 @@ class ManifestContractTest(unittest.TestCase):
     def test_zcode_manifest_core_fields(self):
         m = self._load(".zcode-plugin/plugin.json")
         self.assertEqual(m["name"], "flowguard")
-        self.assertEqual(m["displayName"], "研发流程门禁")
+        self.assertEqual(m["displayName"], "FlowGuard")
         # sync-plugin-configs 以 catalog 为单源规范 i18n（en 与 displayName 同值）
-        self.assertEqual(m["displayName_i18n"]["en"], "研发流程门禁")
+        self.assertEqual(m["displayName_i18n"]["en"], "FlowGuard")
         # 版本不断言字面量（发版脚本每次 bump）；与 catalog 的同步由市场仓 sync-plugin-configs 在发布时强制
         self.assertRegex(m["version"], r"^\d+\.\d+\.\d+$")
         self.assertEqual(m["license"], "Apache-2.0")
