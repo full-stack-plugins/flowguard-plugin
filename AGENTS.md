@@ -39,3 +39,13 @@
 - 当前实施计划：`docs/superpowers/plans/2026-09-23-flowguard-agent-driven-sdd-governance.md`
 - v0.2 的“十阶段仅兼容”决策已被当前规格取代；`.flowguard/` 兼容/迁移线已于 v0.4.0（2026-09-23）下线，旧命令面一并移除。
 - 钩子协议：`hooks/__protocol__.md`（改协议必须同 commit 更新契约与测试）
+
+<!-- partme-agent-plugin-policy:v1 -->
+## Partme Agent Plugin Architecture Rules v1
+
+- 组织级架构规范（跨 `full-aigc-plugins` 与 `full-stack-plugins` 的唯一事实源）：[Partme Agent Plugin Architecture Rules v1](https://github.com/full-aigc-plugins/.github/blob/main/docs/standards/partme-agent-plugin-architecture-rules-v1.md)。
+- **Harness 可选**：默认直接使用 Skills + CLI/MCP；只有确有必要时才使用最多一个可发现的 `skills/*-harness/SKILL.md`，其中的 `scripts/harness.py` 同样可选。
+- 不重复开发宿主 Agent Runtime、原生 CLI/MCP 业务执行器、持久数据库或权威任务状态。正式功能必须具备可核验的 Agent → Skill/Command → Tool → Artifact 调用链。
+- 保留本仓库现有 OpenSpec、技能来源锁、安全门禁、版本发布及 CI 要求；静态检查不能替代真实宿主验收。
+- CI 复用组织级 [Partme Plugin Architecture 检查器](https://github.com/full-aigc-plugins/.github/blob/main/scripts/check_plugin_architecture.py)，不得复制独立实现。
+<!-- /partme-agent-plugin-policy:v1 -->
