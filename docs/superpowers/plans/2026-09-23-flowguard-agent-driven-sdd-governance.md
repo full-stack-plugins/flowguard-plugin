@@ -47,3 +47,37 @@
 **创建日期**：2026-09-23
 **最后更新**：2026-09-23
 **文档状态**：✅ 已实现并验证
+
+## 5. 工程守卫集成任务（2026-10-17）
+
+来源：2026-10-17 按既有总体规划重建，feature: engineering-guard-integration。当前检出未包含旧引用的 EG-W 定义；以下是新重建内容，不声称恢复历史原文。依据为 [traceability](https://github.com/full-stack-plugins/codeguard/blob/8d7c0e997bf21b3306573b3be89ff8c312c9de38/docs/engineering-guard/traceability.md)、[acceptance](https://github.com/full-stack-plugins/codeguard/blob/8d7c0e997bf21b3306573b3be89ff8c312c9de38/docs/engineering-guard/acceptance.md)、[protocol](https://github.com/full-stack-plugins/codeguard/blob/8d7c0e997bf21b3306573b3be89ff8c312c9de38/docs/engineering-guard/protocol.md) 和本规格既有十阶段约束。不建立 OpenSpec 或第二套阶段事实源，不修改现有用户验收语义。
+
+本节全部待实施，不继承上文旧计划的“已实现并验证”状态。EG-W任务及完成状态仅在此处维护。W03/W05/W08/W13 为固定provider的兼容义务，W12为完整产品/真实宿主及owner交接的最终验收；二者都必须完成，不用拆分规避最终义务。
+
+- [ ] 5.1 **EG-W01** [owner=flowguard-plugin] 固定十阶段、docs布局和原生SDD选择及现有provider版本；供FlowGuard产品入口接入，不声称已纯Rust。 依赖：EG-M01, EG-K01。规格：EG-WF-001。
+
+- [ ] 5.2 **EG-W02** [owner=flowguard-plugin] 接独立领域证据与实际候选身份，保留原始报告与限制；CodeReview success/limited、Git allow质量未评价均不能推进。 依赖：EG-W01, EG-K04。规格：EG-WF-002。
+
+- [ ] 5.3 **EG-W03** [owner=flowguard-plugin] 提供现有流程provider的批准/动作决策兼容接口，公共内核只执行通用策略；与产品最终迁移分开验收。 依赖：EG-W02, EG-K08。规格：EG-WF-003, EG-WF-004。
+
+- [ ] 5.4 **EG-W04** [owner=flowguard-plugin] 核验scope/期限/撤销/意图及跨会话批准，保持MUTED/既有授权复用；伪造actor和范围扩大反例拒绝。 依赖：EG-W03, EG-K09。规格：EG-WF-003, EG-WF-005。
+
+- [ ] 5.5 **EG-W05** [owner=flowguard-plugin] 接最小全域技术证据与真实批准门禁provider；缺任一契约必需域/义务/审查处置仍阻断，供首批联合验收消费。 依赖：EG-W03, EG-W04, EG-K07。规格：EG-WF-003, EG-WF-004, EG-WF-008。
+
+- [ ] 5.6 **EG-W06** [owner=flowguard-plugin] 固定功能/任务/阶段依赖及需求增量范围，先写漏任务/跨功能影响反例，再验证独立任务合法路径。 依赖：EG-W01, EG-K03。规格：EG-WF-006。
+
+- [ ] 5.7 **EG-W07** [owner=flowguard-plugin] 接FlowGuard产品的动作/阶段规则包，旧provider阶段语义继续单一拥有；生成技能模板与呈现面一致，不新增第二判定核。 依赖：EG-W05, EG-L02。规格：EG-WF-001, EG-WF-004。
+
+- [ ] 5.8 **EG-W08** [owner=flowguard-plugin] 完成宿主能力、CLI/MCP/Hook协议与N/N-1兼容资格；实际安装/取消/重入每格留证，缺宿主明确unverified。 依赖：EG-W05, EG-K18。规格：EG-WF-005, EG-WF-008。
+
+- [ ] 5.9 **EG-W09** [owner=flowguard-plugin] 接符号/API影响和当前候选证据，双会话/双worktree及不同文件语义冲突验证；风险不冒充确定事实。 依赖：EG-W06, EG-K23。规格：EG-WF-002, EG-WF-006。
+
+- [ ] 5.10 **EG-W10** [owner=flowguard-plugin] 实现ADR/契约/依赖变化的阶段失效及逐仓发布恢复追踪，保留旧批准与原始报告，不承诺跨仓原子事务。 依赖：EG-W09, EG-K25。规格：EG-WF-006, EG-WF-007。
+
+- [ ] 5.11 **EG-W11** [owner=flowguard-plugin] 接平台身份、租户隔离、证据保留与撤销端口，跨租户/任务读取拒绝且日志脱敏，单机不冒充平台身份。 依赖：EG-W04, EG-K26。规格：EG-WF-003, EG-WF-007。
+
+- [ ] 5.12 **EG-W12** [owner=flowguard-plugin] 完成真实宿主、六守卫阶段联验、跨仓恢复和版本/市场发布回滚；十阶段规则正式移交后旧插件只委托产品。 依赖：EG-W07, EG-W08, EG-W10, EG-W11, EG-L04, EG-K20。规格：EG-WF-001, EG-WF-008。
+
+- [ ] 5.13 **EG-W13** [owner=flowguard-plugin] 准备十阶段规则与批准/失效/恢复/allowed_actions的版本固定导出和黄金差分provider，供L04接收；最终owner切换仍由W12验收，不提前双写。 依赖：EG-W03, EG-W06。规格：EG-WF-004, EG-WF-008。
+
+验证：遵循既有TDD与单一治理核纪律；测试须包含目标反例、受影响回归、模板parity、vendor与真实宿主/受保护执行证据。无环境或授权时保留未验收，不以本地Hook重放替代。全部证据齐备后才勾选；不自动发布或推进项目阶段。
