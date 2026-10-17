@@ -22,7 +22,7 @@
       "interface": {
         "displayName": "FlowGuard",
         "shortDescription": "智能体 SDD 治理：原生规格、证据与提交门禁",
-        "logo": "https://cdn.jsdelivr.net/gh/full-stack-plugins/flowguard-plugin@v0.4.2/assets/official-logo.png"
+        "logo": "https://cdn.jsdelivr.net/gh/full-stack-plugins/flowguard-plugin@v0.5.0/assets/official-logo.png"
       }
     }
   ]
