@@ -4,4 +4,4 @@
 # for the other hosts.
 - insert:
     - id: flowguard-plugin
-      name: '@partme-dsh/flowguard'
+      name: 'flowguard'

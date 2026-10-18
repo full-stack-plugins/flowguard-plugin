@@ -1,5 +1,5 @@
 {
-  "name": "@partme-dsh/flowguard",
+  "name": "flowguard",
   "version": "0.5.0",
   "description": "Agent-driven SDD governance for Codex, ZCode, Kimi and Claude: native Spec Kit/OpenSpec/Superpowers discovery, session-worktree task binding, evidence freshness and deterministic code/commit/release gates.",
   "type": "module",
@@ -31,5 +31,6 @@
     "bundle": {
       "patch": "./cordis.patch.yml"
     }
-  }
+  },
+  "private": true
 }
