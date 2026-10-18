@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "FlowGuard",
+    "description": "Agent-driven SDD governance for Codex, ZCode, Kimi and Claude: native Spec Kit/OpenSpec/Superpowers discovery, session-worktree task binding, evidence freshness and deterministic code/commit/release gates."
+  }
+}
