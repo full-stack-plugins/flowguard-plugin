@@ -1,7 +1,7 @@
 {
   "name": "flowguard",
   "version": "0.5.0",
-  "description": "Agent-driven SDD governance for Codex, ZCode, Kimi and Claude: native Spec Kit/OpenSpec/Superpowers discovery, session-worktree task binding, evidence freshness and deterministic code/commit/release gates.",
+  "description": "Agent-driven SDD governance: native Spec Kit/OpenSpec/Superpowers discovery, task binding, evidence freshness and deterministic code/commit/release gates.",
   "author": {
     "name": "Full Stack Skills / PartMe.AI",
     "url": "https://github.com/full-stack-plugins/flowguard-plugin"

@@ -2,8 +2,8 @@
   "name": "flowguard",
   "version": "0.5.0",
   "interface": {
-    "displayName": "FlowGuard",
-    "shortDescription": "智能体 SDD 治理：原生规格、证据与提交门禁",
+    "displayName": "SDD Governance · FlowGuard",
+    "shortDescription": "Ten-stage SDD, evidence freshness and release gates",
     "category": "development"
   },
   "skills": "./skills/",
@@ -44,5 +44,5 @@
       "timeout": 30
     }
   ],
-  "description": "Agent-driven SDD governance for Codex, ZCode, Kimi and Claude: native Spec Kit/OpenSpec/Superpowers discovery, session-worktree task binding, evidence freshness and deterministic code/commit/release gates."
+  "description": "Agent-driven SDD governance: native Spec Kit/OpenSpec/Superpowers discovery, task binding, evidence freshness and deterministic code/commit/release gates."
 }

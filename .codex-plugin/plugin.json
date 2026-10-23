@@ -1,6 +1,6 @@
 {
   "name": "flowguard",
-  "version": "0.5.0+codex.20261018",
+  "version": "0.5.0",
   "author": {
     "name": "Full Stack Skills / PartMe.AI",
     "url": "https://github.com/full-stack-plugins/flowguard-plugin"
@@ -17,8 +17,8 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "FlowGuard",
-    "shortDescription": "智能体 SDD 治理：原生规格、证据与提交门禁",
+    "displayName": "SDD Governance · FlowGuard",
+    "shortDescription": "Ten-stage SDD, evidence freshness and release gates",
     "longDescription": "智能体根据任务语义选择并推进 Spec Kit、OpenSpec 或 Superpowers；FlowGuard 绑定会话、worktree 与变更，校验用户批准、父子依赖以及 CodeGuard、CodeReview 和测试证据，在写码、Git 提交和发布前执行确定性门禁。",
     "developerName": "Full Stack Skills / PartMe.AI",
     "category": "developer-tools",
@@ -37,7 +37,9 @@
       "为这个变更绑定 FlowGuard 上下文并检查写码条件",
       "检查当前变更是否具备 Git 提交所需的有效证据"
     ],
-    "logoDark": "./assets/official-logo.png"
+    "logoDark": "./assets/official-logo.png",
+    "composerIcon": "./assets/official-logo.png",
+    "composerIconDark": "./assets/official-logo.png"
   },
-  "description": "Agent-driven SDD governance for Codex, ZCode, Kimi and Claude: native Spec Kit/OpenSpec/Superpowers discovery, session-worktree task binding, evidence freshness and deterministic code/commit/release gates."
+  "description": "Agent-driven SDD governance: native Spec Kit/OpenSpec/Superpowers discovery, task binding, evidence freshness and deterministic code/commit/release gates."
 }
