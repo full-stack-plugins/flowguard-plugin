@@ -2,13 +2,11 @@
   "name": "flowguard",
   "displayName": "FlowGuard（研发流程治理）",
   "displayName_i18n": {
-    "en": "FlowGuard · SDD Governance",
     "zh-CN": "FlowGuard（研发流程治理）"
   },
-  "version": "0.5.1",
+  "version": "0.5.0",
   "description": "智能体 SDD 治理：识别 Spec Kit/OpenSpec/Superpowers 原生产物，绑定任务，校验证据新鲜度并执行提交/发布门禁。",
   "description_i18n": {
-    "en": "Agent-driven SDD governance: native Spec Kit/OpenSpec/Superpowers discovery, task binding, evidence freshness and deterministic code/commit/release gates.",
     "zh-CN": "智能体 SDD 治理：识别 Spec Kit/OpenSpec/Superpowers 原生产物，绑定任务，校验证据新鲜度并执行提交/发布门禁。"
   },
   "author": {
