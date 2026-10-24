@@ -20,8 +20,8 @@
   "extensions": {
     "com.openai": {
       "interface": {
-        "displayName": "FlowGuard · SDD Governance",
-        "shortDescription": "Ten-stage SDD, evidence freshness and release gates",
+        "displayName": "FlowGuard（研发流程治理）",
+        "shortDescription": "十阶段 SDD、证据新鲜度与发布裁决",
         "longDescription": "智能体根据任务语义选择并推进 Spec Kit、OpenSpec 或 Superpowers；FlowGuard 绑定会话、worktree 与变更，校验用户批准、父子依赖以及 CodeGuard、CodeReview 和测试证据，在写码、Git 提交和发布前执行确定性门禁。",
         "developerName": "Full Stack Skills / PartMe.AI",
         "category": "developer-tools",
