@@ -1,6 +1,6 @@
 {
   "name": "flowguard",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "interface": {
     "displayName": "FlowGuard（研发流程治理）",
     "shortDescription": "十阶段 SDD、证据新鲜度与发布裁决",
