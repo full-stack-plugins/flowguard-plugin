@@ -2,7 +2,8 @@
   "name": "flowguard",
   "displayName": "FlowGuard（研发流程防护）",
   "displayName_i18n": {
-    "zh-CN": "FlowGuard（研发流程防护）"
+    "zh-CN": "FlowGuard（研发流程防护）",
+    "en": "FlowGuard"
   },
   "version": "0.5.2",
   "description": "智能体 SDD 治理：识别 Spec Kit/OpenSpec/Superpowers 原生产物，绑定任务，校验证据新鲜度并执行提交/发布门禁。",
