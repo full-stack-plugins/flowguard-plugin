@@ -9,18 +9,18 @@
       "source": {
         "source": "url",
         "url": "https://github.com/full-stack-plugins/flowguard-plugin.git",
-        "ref": "v0.5.1"
+        "ref": "v0.5.2"
       },
       "policy": {
         "installation": "AVAILABLE",
         "authentication": "ON_USE"
       },
       "category": "Developer Tools",
-      "version": "0.5.1",
+      "version": "0.5.2",
       "icon": "https://cdn.jsdelivr.net/gh/full-stack-plugins/flowguard-plugin@v0.5.1/assets/official-logo.png",
       "description": "智能体 SDD 治理：识别 Spec Kit/OpenSpec/Superpowers 原生产物，绑定任务，校验证据新鲜度并执行提交/发布门禁。",
       "interface": {
-        "displayName": "FlowGuard（研发流程治理）",
+        "displayName": "FlowGuard（研发流程防护）",
         "shortDescription": "十阶段 SDD、证据新鲜度与发布裁决",
         "logo": "https://cdn.jsdelivr.net/gh/full-stack-plugins/flowguard-plugin@v0.5.1/assets/official-logo.png"
       },
@@ -29,7 +29,7 @@
         "skills",
         "mcp"
       ],
-      "displayName": "FlowGuard（研发流程治理）",
+      "displayName": "FlowGuard（研发流程防护）",
       "shortDescription": "十阶段 SDD、证据新鲜度与发布裁决"
     }
   ]
