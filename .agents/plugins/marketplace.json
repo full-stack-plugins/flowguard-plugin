@@ -18,17 +18,18 @@
       "category": "Developer Tools",
       "version": "0.5.0",
       "icon": "https://cdn.jsdelivr.net/gh/full-stack-plugins/flowguard-plugin@v0.5.0/assets/official-logo.png",
-      "description": "Agent-driven SDD governance: native Spec Kit/OpenSpec/Superpowers discovery, task binding, evidence freshness and deterministic code/commit/release gates.",
+      "description": "智能体 SDD 治理：识别 Spec Kit/OpenSpec/Superpowers 原生产物，绑定任务，校验证据新鲜度并执行提交/发布门禁。",
       "interface": {
-        "displayName": "FlowGuard · SDD Governance",
-        "shortDescription": "Ten-stage SDD, evidence freshness and release gates",
+        "displayName": "FlowGuard（研发流程治理）",
+        "shortDescription": "十阶段 SDD、证据新鲜度与发布裁决",
         "logo": "https://cdn.jsdelivr.net/gh/full-stack-plugins/flowguard-plugin@v0.5.0/assets/official-logo.png"
       },
       "line": "full-stack",
       "componentTypes": [
         "skills",
         "mcp"
-      ]
+      ],
+      "displayName": "FlowGuard（研发流程治理）"
     }
   ]
 }

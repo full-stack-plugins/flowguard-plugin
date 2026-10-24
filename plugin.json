@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "flowguard",
   "version": "0.5.0",
-  "description": "Agent-driven SDD governance: native Spec Kit/OpenSpec/Superpowers discovery, task binding, evidence freshness and deterministic code/commit/release gates.",
+  "description": "智能体 SDD 治理：识别 Spec Kit/OpenSpec/Superpowers 原生产物，绑定任务，校验证据新鲜度并执行提交/发布门禁。",
   "author": {
     "name": "Full Stack Skills / PartMe.AI",
     "url": "https://github.com/full-stack-plugins/flowguard-plugin"
@@ -48,5 +48,12 @@
     "ai.nanoco.nanoclaw": {
       "agentName": "FlowGuard"
     }
+  },
+  "displayName": "FlowGuard（研发流程治理）",
+  "displayName_i18n": {
+    "zh-CN": "FlowGuard（研发流程治理）"
+  },
+  "description_i18n": {
+    "zh-CN": "智能体 SDD 治理：识别 Spec Kit/OpenSpec/Superpowers 原生产物，绑定任务，校验证据新鲜度并执行提交/发布门禁。"
   }
 }
