@@ -1,113 +1,160 @@
-# FlowGuard · Agent-Driven SDD Governance
+# FlowGuard（研发流程治理）
 
-[![skills-check](https://github.com/full-stack-plugins/flowguard-plugin/actions/workflows/skills-check.yml/badge.svg)](https://github.com/full-stack-plugins/flowguard-plugin/actions/workflows/skills-check.yml)
-[![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+> 十阶段 SDD、证据新鲜度与发布裁决
 
-FlowGuard is an agent governance plugin for Codex, ZCode, Kimi, and Claude. **Its ten-stage process remains mandatory and agent-driven; native SDD tools own specifications and engineering methods; FlowGuard validates stage documents in `docs/`, approvals, dependencies, and evidence.**
+**版本**：0.5.0 · **许可证**：Apache-2.0 · **技能**：11 个
 
-## Responsibilities
+[English](README.en.md) · [安装](#安装) · [快速开始](#快速开始) · [项目结构](#项目结构)
 
-- Spec Kit / OpenSpec own the native specification source of truth.
-- Superpowers provides execution methods such as clarification, planning, TDD, debugging, review, and verification.
-- FlowGuard discovers repository state, binds `session + worktree + task/change`, validates dependencies and evidence, and gates code writes, commits, and releases.
-- CodeGuard produces deterministic test, static-analysis, build, dependency, and credential evidence.
-- CodeReview produces semantic-review evidence grounded in the selected specification and code context.
+## 项目定位
 
-FlowGuard does not copy specifications, silently initialize tools, or turn a machine PASS into user acceptance.
+智能体 SDD 治理：识别 Spec Kit/OpenSpec/Superpowers 原生产物，绑定任务，校验证据新鲜度并执行提交/发布门禁。
 
-## Governance loop
+本插件属于研发工具线，面向需要在真实仓库或真实服务上完成操作、并保留可核验结果的用户。
 
-```mermaid
-flowchart LR
-    D[Discover Git / SDD] --> C[Agent classifies and selects]
-    C --> B[Bind context]
-    B --> N[Agent advances ten stages, docs, and native specs]
-    N --> E[Tests / CodeGuard / CodeReview]
-    E --> G[FlowGuard action decision]
-    G -->|Missing| C
-    G -->|Satisfied| A[Allow code / commit / release]
+## 一眼看懂
+
+```text
+仓库 / 服务 / 配置 / 请求
+        │
+        ▼
+FlowGuard（研发流程治理） 技能（检查 → 计划 → 执行 → 核验）
+        │
+        ├── MCP 服务
+        └── 固定 CLI / API
+        │
+        ▼
+变更结果 + 证据 + 回退路径
 ```
 
-The ten stages are a verifiable process skeleton, not a Hook-driven script. Read-only tasks only need discovery and classification; writing tasks must satisfy applicable stage gates.
+## 能力与边界
 
-| Task type | Default governance |
-|:---|:---|
-| Read-only analysis | Discover and classify; no initialization required |
-| Simple change | Bind context; reuse or justify skipped stages; retain verification evidence |
-| Important change | Bind a native specification, complete ten-stage documents and approval, execute with TDD |
-| Production incident | Restore stability first; backfill behavior-changing specifications |
+| 能力 | 说明 | 边界 |
+|---|---|---|
+| 检查 | 读取当前状态与配置 | 不修改未授权目标 |
+| 计划 | 说明将执行的步骤与影响 | 高风险操作需明确确认 |
+| 执行 | 通过 MCP 或固定工具完成操作 | 不绕过权限与审计 |
+| 核验 | 回读结果、日志与状态 | 命令成功不等于目标达成 |
+| 恢复 | 保留回退路径与证据 | 不确定时不自动重放 |
 
-## Quick start
+## 架构与核心流程
+
+```text
+宿主 / Agent
+   │  调用技能
+   ▼
+skills/flowguard-*  ──►  MCP 服务 / 固定 CLI
+                              │
+                              ▼
+                     目标系统 / 仓库
+                              │
+                              ▼
+                     回读、核验、报告
+```
+
+原则：
+
+1. 先只读检查，再计划，再执行。
+2. 明确目标、范围、凭据和回退方式。
+3. 执行后回读真实现场，不只看退出码。
+4. 不确定时停止并报告，不自动重试有副作用的操作。
+
+## 兼容性
+
+| 项目 | 状态 |
+|---|---|
+| 宿主 | 支持 MCP 的宿主 |
+| 运行时 | 以插件清单与实际安装环境为准 |
+| 平台 | 以发行说明与目标系统为准 |
+
+## 安装
 
 ```bash
-/flowguard-discover    # read-only; never installs or initializes tools
-/flowguard-context     # classify and bind this session/worktree/task
-/flowguard-init        # create project-level stage docs 02/07/10
-/flowguard-stage       # read and advance docs/ stage documents
-/flowguard-evidence    # record real verification evidence
-/flowguard-governance  # check code-write, commit, or release readiness
+codex plugin marketplace add partme-ai/full-stack-plugins
+codex plugin add flowguard@full-stack-plugins
 ```
 
-The CLI additionally provides `validate` (artifact content, traceability matrix and module-stack coverage checks).
+安装后重启宿主，先做只读检查。
 
-Kimi registers the same command prompts as namespaced Markdown commands, for example `/flowguard:flowguard-discover`. The Markdown files in `kimi-commands/` are generated from `commands/*.json`; regenerate with `python3 scripts/generate_kimi_commands.py --write` after changing a source command. Kimi Shell may not expose `KIMI_PLUGIN_ROOT`; in that case, use `/plugins info flowguard` to locate the enabled plugin before running its bundled CLI. The plugin remains centrally cataloged in `full-stack-plugins`; this source repository is maintained separately.
+## 快速开始
 
-CLI example:
+1. 确认目标、环境、权限和影响范围。
+2. 只读检查现状，记录基线。
+3. 执行一次有界变更。
+4. 回读目标状态、日志和关键指标。
+5. 保存证据；失败时按回退路径恢复。
+
+## 配置
+
+按插件文档配置 MCP 地址、认证方式和目标环境。不要把令牌、密码或私钥写入仓库。
+
+## 扩展契约
+
+新增技能时应使用 `flowguard-` 前缀，声明触发条件、权限边界和失败处理，通过 MCP 或固定工具执行，并在变更后回读核验。
+
+## 重试、幂等与恢复
+
+- 失败后先检查目标当前状态。
+- 不自动重放已产生副作用的操作。
+- 重试前确认幂等条件与回退路径。
+- 保留命令、日志和结果证据。
+
+## 数据与状态
+
+- 凭据只从安全配置读取。
+- 变更前后的状态分别记录。
+- 不把生产数据复制到不受控目录。
+
+## 安全
+
+- 遵循最小权限原则。
+- 高风险操作必须明确确认。
+- 发现凭据泄露先轮换，再清理痕迹。
+- 不绕过审计、权限或分支保护。
+
+## 可观测性与运行
+
+记录命令、目标、时间、结果和关键指标；交付前回读一次真实状态。
+
+## 开发与验证
 
 ```bash
-python3 scripts/flowguard_state.py discover --json
-python3 scripts/flowguard_state.py context bind \
-  --session session-1 --task-id refund-idempotency \
-  --task-type important_change --spec-system openspec \
-  --spec-ref openspec/changes/refund-idempotency --json
-python3 scripts/flowguard_state.py stage status --task-id refund-idempotency --json
-python3 scripts/flowguard_state.py governance \
-  --session session-1 --action code_write --json
+node --test
+python3 -m pytest
 ```
 
-## Action gates
+## 打包与发布
 
-| Action | Minimum condition |
-|:---|:---|
-| Read / specification remediation | Always open so a block can be resolved |
-| Test write | Active governance context |
-| Business-code write | Stages 01–07 satisfied; important changes also need a valid spec and scope approval |
-| `git commit` | Stages 01–09 plus valid current-fingerprint tests, static analysis, and semantic review |
-| Release | All ten stages, valid stage-09 documents for every feature listed in the stage-10 release scope, release readiness, user acceptance, and completed dependencies/children |
+版本与清单、市场、tag 一致；发布后重新安装并做一次只读检查。
 
-Denials use exit code 2 and return `code / message / fix / missing / allowed_actions`. Hook failures fail open; known governance gaps fail closed.
+## 升级与迁移
 
-## Hooks
+升级前备份配置与状态；确认兼容性；迁移后重新核验连接和权限。
 
-- `SessionStart`: discover SDD state and restore context.
-- `UserPromptSubmit`: remind the agent to reassess task, scope, and source of truth.
-- `PreToolUse`: gate code writes, Git commits, and releases; protect governance state.
-- `PostToolUse`: expire stale evidence and observe explicit test exit codes; CodeGuard/CodeReview PASS requires a structured, verifiable result rather than a zero exit code alone.
-- Kimi `PostToolUseFailure` for Shell: mark a recognized failed test run as FAIL so an earlier PASS cannot remain current.
-- `Stop`: summarize missing evidence and the next action without treating the turn as task completion.
+## 故障排查
 
-See [hooks/__protocol__.md](hooks/__protocol__.md).
+| 现象 | 检查 |
+|---|---|
+| 连接失败 | 地址、网络、认证 |
+| 权限不足 | 账号角色与令牌范围 |
+| 操作无效果 | 回读目标状态与日志 |
+| 结果不确定 | 停止重试，先核对现场 |
 
-## Document locations
+## 项目结构
 
-Project stages 02/07/10 live in `docs/project/`; feature stages 01/03/04/05/06/08/09 live in `docs/features/<task-id>/`. Session cache lives outside the repository in the host state directory. The legacy `.flowguard/` layout and its migration commands were removed in v0.4.0; `docs/legacy-flowguard/` in this repository is a read-only historical archive.
-
-## Documentation
-
-- [Current architecture](docs/FlowGuard-Architecture.zh_CN.md)
-- [Ten-stage docs governance specification](docs/superpowers/specs/2026-09-23-flowguard-docs-ten-stage-governance.md)
-- [Implementation plan](docs/superpowers/plans/2026-09-23-flowguard-agent-driven-sdd-governance.md)
-- [Artifact contract](docs/FLOWGUARD_ARTIFACT_SPEC.md)
-- [Roadmap](docs/roadmap.md)
-
-## Verification
-
-```bash
-python3 -m unittest discover -s tests -v
-python3 scripts/vendor/skill_vendor.py check --offline
-python3 scripts/generate_skills.py
-python3 scripts/generate_kimi_commands.py
-git diff --check
+```text
+flowguard-plugin/
+├── .zcode-plugin/      # ZCode 清单
+├── .codex-plugin/      # Codex 清单
+├── skills/             # 11 个技能
+├── docs/               # 架构与验证记录
+└── assets/             # 图标与静态资源
 ```
 
-Python standard library only. Apache-2.0; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for implementation references.
+## 贡献与支持
+
+提交问题时附上插件版本、宿主、目标环境、命令、日志和预期结果。不要附凭据或生产数据。
+
+## 许可证
+
+Apache-2.0，见 [LICENSE](LICENSE)。
