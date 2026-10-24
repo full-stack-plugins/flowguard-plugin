@@ -4,7 +4,7 @@
   "displayName_i18n": {
     "zh-CN": "FlowGuard（研发流程治理）"
   },
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "智能体 SDD 治理：识别 Spec Kit/OpenSpec/Superpowers 原生产物，绑定任务，校验证据新鲜度并执行提交/发布门禁。",
   "description_i18n": {
     "zh-CN": "智能体 SDD 治理：识别 Spec Kit/OpenSpec/Superpowers 原生产物，绑定任务，校验证据新鲜度并执行提交/发布门禁。"

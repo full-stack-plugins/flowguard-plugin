@@ -9,14 +9,14 @@
       "source": {
         "source": "url",
         "url": "https://github.com/full-stack-plugins/flowguard-plugin.git",
-        "ref": "v0.5.0"
+        "ref": "v0.5.1"
       },
       "policy": {
         "installation": "AVAILABLE",
         "authentication": "ON_USE"
       },
       "category": "Developer Tools",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "icon": "https://cdn.jsdelivr.net/gh/full-stack-plugins/flowguard-plugin@v0.5.0/assets/official-logo.png",
       "description": "智能体 SDD 治理：识别 Spec Kit/OpenSpec/Superpowers 原生产物，绑定任务，校验证据新鲜度并执行提交/发布门禁。",
       "interface": {
