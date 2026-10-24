@@ -1,7 +1,7 @@
 {
   "name": "full-stack-plugins-flowguard",
   "interface": {
-    "displayName": "FlowGuard · SDD Governance"
+    "displayName": "FlowGuard（研发流程治理）"
   },
   "plugins": [
     {
