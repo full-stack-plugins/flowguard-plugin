@@ -2,7 +2,7 @@
   "name": "flowguard",
   "version": "0.5.0",
   "interface": {
-    "displayName": "SDD Governance · FlowGuard",
+    "displayName": "FlowGuard · SDD Governance",
     "shortDescription": "Ten-stage SDD, evidence freshness and release gates",
     "category": "development"
   },

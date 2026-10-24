@@ -1,8 +1,8 @@
 {
   "name": "flowguard",
-  "displayName": "SDD Governance · FlowGuard",
+  "displayName": "FlowGuard · SDD Governance",
   "displayName_i18n": {
-    "en": "SDD Governance · FlowGuard"
+    "en": "FlowGuard · SDD Governance"
   },
   "version": "0.5.0",
   "description": "Agent-driven SDD governance: native Spec Kit/OpenSpec/Superpowers discovery, task binding, evidence freshness and deterministic code/commit/release gates.",
